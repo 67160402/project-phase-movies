@@ -1,0 +1,483 @@
+openapi: 3.0.3
+
+info:
+  title: Movie API
+  version: 1.0.0
+  description: API สำหรับจัดการภาพยนตร์และประเภทภาพยนตร์
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+tags:
+  - name: Movies
+    description: จัดการข้อมูลภาพยนตร์
+  - name: Genres
+    description: จัดการประเภทภาพยนตร์
+  - name: Movie Genres
+    description: จัดการความสัมพันธ์ระหว่างภาพยนตร์กับประเภท
+
+paths:
+  /:
+    get:
+      summary: ตรวจสอบสถานะ API
+      tags:
+        - Movies
+      responses:
+        "200":
+          description: API พร้อมใช้งาน
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: Movie API พร้อมใช้งานแล้ว
+
+  /api/v1/movies:
+    get:
+      summary: ดึงรายการภาพยนตร์ทั้งหมด
+      tags:
+        - Movies
+      responses:
+        "200":
+          description: ดึงข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Movie"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: เพิ่มภาพยนตร์
+      tags:
+        - Movies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieInput"
+            example:
+              title: Test Movie
+              director: Test Director
+              release_year: 2025
+      responses:
+        "201":
+          description: เพิ่มภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/movies/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+
+    get:
+      summary: ดึงรายละเอียดภาพยนตร์ตาม ID
+      tags:
+        - Movies
+      responses:
+        "200":
+          description: พบข้อมูลภาพยนตร์
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: แก้ไขข้อมูลภาพยนตร์
+      tags:
+        - Movies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieInput"
+      responses:
+        "200":
+          description: แก้ไขภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MovieResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: ลบภาพยนตร์
+      tags:
+        - Movies
+      responses:
+        "200":
+          description: ลบภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: ลบภาพยนตร์สำเร็จ
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/genres:
+    get:
+      summary: ดึงรายการประเภทภาพยนตร์ทั้งหมด
+      tags:
+        - Genres
+      responses:
+        "200":
+          description: ดึงข้อมูลสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Genre"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: เพิ่มประเภทภาพยนตร์
+      tags:
+        - Genres
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenreInput"
+            example:
+              name: Documentary
+      responses:
+        "201":
+          description: เพิ่มประเภทภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenreResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: มีชื่อประเภทภาพยนตร์นี้อยู่แล้ว
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error:
+                  code: DUPLICATE_GENRE
+                  message: มีประเภทภาพยนตร์นี้อยู่แล้ว
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/movies/{id}/genres:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+
+    get:
+      summary: ดึงประเภทของภาพยนตร์
+      tags:
+        - Movie Genres
+      responses:
+        "200":
+          description: ดึงประเภทภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Genre"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: กำหนดประเภทให้ภาพยนตร์
+      description: แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา
+      tags:
+        - Movie Genres
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovieGenresInput"
+            example:
+              genre_ids: [1, 3]
+      responses:
+        "200":
+          description: กำหนดประเภทภาพยนตร์สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  movie_id:
+                    type: integer
+                  genre_ids:
+                    type: array
+                    items:
+                      type: integer
+              example:
+                message: กำหนดประเภทภาพยนตร์สำเร็จ
+                movie_id: 1
+                genre_ids: [1, 3]
+        "400":
+          description: ข้อมูลไม่ถูกต้องหรือมี Genre ID ที่ไม่มีอยู่
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidInput:
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: genre_ids ต้องเป็น array ของ ID จำนวนเต็มบวกที่ไม่ซ้ำกัน
+                invalidGenre:
+                  value:
+                    error:
+                      code: INVALID_GENRE_IDS
+                      message: มี ID ประเภทภาพยนตร์ที่ไม่มีอยู่ในระบบ
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /api/v1/external/movies:
+    get:
+      summary: ค้นหาข้อมูลภาพยนตร์จาก External API
+      description: เรียก OMDb API โดยมี Retry, Timeout และ Fallback
+      tags:
+        - External API
+      parameters:
+        - name: title
+          in: query
+          required: true
+          description: ชื่อภาพยนตร์ที่ต้องการค้นหา
+          schema:
+            type: string
+          example: Inception
+      responses:
+        "200":
+          description: ค้นหาสำเร็จ หรือใช้ข้อมูลสำรองเมื่อ External API ล้มเหลว
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source:
+                    type: string
+                    enum: [omdb, fallback]
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+                    additionalProperties: true
+        "400":
+          description: ไม่ได้ระบุชื่อภาพยนตร์
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: ID ของภาพยนตร์
+      schema:
+        type: integer
+        minimum: 1
+
+  schemas:
+    Movie:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Inception
+        director:
+          type: string
+          example: Christopher Nolan
+        release_year:
+          type: integer
+          example: 2010
+      required:
+        - id
+        - title
+        - director
+        - release_year
+
+    MovieInput:
+      type: object
+      required:
+        - title
+        - director
+        - release_year
+      properties:
+        title:
+          type: string
+          example: Test Movie
+        director:
+          type: string
+          example: Test Director
+        release_year:
+          type: integer
+          minimum: 1
+          example: 2025
+
+    Genre:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Sci-Fi
+      required:
+        - id
+        - name
+
+    GenreInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Documentary
+
+    MovieResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+        data:
+          $ref: "#/components/schemas/Movie"
+
+    GenreResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: เพิ่มประเภทภาพยนตร์สำเร็จ
+        data:
+          $ref: "#/components/schemas/Genre"
+
+    MovieGenresInput:
+      type: object
+      required:
+        - genre_ids
+      properties:
+        genre_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: integer
+            minimum: 1
+          example: [1, 3]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: NOT_FOUND
+            message:
+              type: string
+              example: ไม่พบข้อมูลภาพยนตร์
+          required:
+            - code
+            - message
+      required:
+        - error
+
+  responses:
+    ValidationError:
+      description: ข้อมูลที่ส่งมาไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: กรุณาระบุข้อมูลให้ถูกต้อง
+
+    NotFound:
+      description: ไม่พบข้อมูลที่ร้องขอ
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: NOT_FOUND
+              message: ไม่พบข้อมูลภาพยนตร์
+
+    InternalServerError:
+      description: เกิดข้อผิดพลาดภายในระบบ
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: เกิดข้อผิดพลาดภายในระบบ
