@@ -1,16 +1,32 @@
 require("dotenv").config();
 
 const express = require("express");
+const path = require("path");
 const pool = require("./db");
 
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
 const { searchExternalMovie } = require("./services/external-api");
 
+// Middleware สำหรับจัดการ Pagination, Sort และ Search
+const { parsePagination, parseSort, parseSearch } = require("./middleware/query-parser");
+
+// เครื่องมือสำหรับจัดการ Password และสร้าง Token
+const { hashPassword, verifyPassword, generateToken } = require("./auth-helpers");
+
+// Middleware สำหรับตรวจสอบ Token และตรวจสอบ Role ของผู้ใช้
+const { authenticateToken, authorizeRole } = require("./middleware/auth");
+
+// Middleware สำหรับป้องกันการเรียก API มากเกินไป (Rate Limiter)
+const { authLimiter, generalLimiter } = require("./middleware/rateLimiter");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// จำกัดจำนวน Request ที่เข้ามายัง API ทั่วไป
+app.use("/api/v1", generalLimiter);
 
 // เอกสาร API ด้วย Swagger UI // Load Swagger documentation
 const swaggerDocument = YAML.load("./openapi.yaml");
@@ -20,6 +36,9 @@ if (process.env.NODE_ENV !== "production") {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
 
+// เปิด Frontend จากโฟลเดอร์ frontend ให้สามารถเข้าถึงได้ผ่าน URL
+app.use(express.static(path.join(__dirname, "frontend")));
+
 // ตรวจสอบการทำงานของ API
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -27,18 +46,193 @@ app.get("/", (req, res) => {
   });
 });
 
-// GET รายการภาพยนตร์ทั้งหมด
-app.get("/api/v1/movies", async (req, res, next) => {
+// ======== Authentication ========
+// สมัครสมาชิก
+// Endpoint นี้ไม่ต้อง Login
+// authLimiter เพื่อป้องกันการสมัครสมาชิกจำนวนมาก
+app.post("/api/v1/auth/register", authLimiter, async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // ตรวจสอบข้อมูลที่ Client ส่งมา
+  if (typeof email !== "string" || !email.trim() || typeof password !== "string" || !password.trim()) {
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "กรุณาระบุ email และ password",
+      },
+    });
+  }
+
   try {
-    const [rows] = await pool.query(`
-      SELECT id, title, director, release_year
-      FROM movies
-      ORDER BY id
-    `);
+    // ลบช่องว่างด้านหน้าและด้านหลังของ Email
+    const cleanEmail = email.trim();
+
+    // ตรวจสอบว่า Email นี้มีอยู่ในระบบแล้วหรือยัง
+    const [existingUsers] = await pool.query("SELECT id FROM users WHERE email = ?", [cleanEmail]);
+
+    if (existingUsers.length > 0) {
+      return res.status(409).json({
+        error: {
+          code: "DUPLICATE_EMAIL",
+          message: "อีเมลนี้มีอยู่ในระบบแล้ว",
+        },
+      });
+    }
+
+    // Hash Password ก่อนจะบันทึกลง Database โดยไม่เก็บ Password จริงเพื่อความปลอดภัย
+    const passwordHash = await hashPassword(password);
+
+    // สมัครสมาชิกใหม่โดยกำหนด Role เริ่มต้นเป็น user
+    const [result] = await pool.query(
+      `INSERT INTO users (email, password_hash, role)
+       VALUES (?, ?, 'user')`,
+      [cleanEmail, passwordHash],
+    );
+
+    // ส่งข้อมูลที่จำเป็นกลับไป แต่ไม่ส่ง Password หรือ Hash กลับไป
+    res.status(201).json({
+      message: "สมัครสมาชิกสำเร็จ",
+      data: {
+        id: result.insertId,
+        email: cleanEmail,
+        role: "user",
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Login
+// ผู้ใช้ส่ง Email และ Password เพื่อขอ Token
+app.post("/api/v1/auth/login", authLimiter, async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // ตรวจสอบข้อมูลที่ผู้ใช้ส่งมา
+  if (typeof email !== "string" || !email.trim() || typeof password !== "string" || !password.trim()) {
+    return res.status(400).json({
+      error: {
+        code: "VALIDATION_ERROR",
+        message: "กรุณาระบุ email และ password",
+      },
+    });
+  }
+
+  try {
+    // ค้นหาผู้ใช้จาก Email ที่ผู้ใช้กรอกเข้ามาใน Database
+    const [rows] = await pool.query(
+      `SELECT id, email, password_hash, role
+       FROM users
+       WHERE email = ?`,
+      [email.trim()],
+    );
+
+    // หากไม่พบ Email ให้ตอบกลับด้วยข้อความเดียวกับกรณี Password ผิด
+    if (rows.length === 0) {
+      return res.status(401).json({
+        error: {
+          code: "INVALID_CREDENTIALS",
+          message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        },
+      });
+    }
+
+    const user = rows[0];
+
+    // เปรียบเทียบ Password ที่ผู้ใช้กรอกกับ Password Hash ที่เก็บไว้ใน Database
+    const isPasswordValid = await verifyPassword(password, user.password_hash);
+
+    // หาก Password ไม่ถูกต้อง ให้ตอบกลับด้วยข้อความเดียวกับกรณี Email ไม่พบ
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        error: {
+          code: "INVALID_CREDENTIALS",
+          message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+        },
+      });
+    }
+
+    // Login สำเร็จ และสร้าง Token ให้ผู้ใช้ โดยใส่ข้อมูลที่จำเป็น เช่น id, email และ role ของผู้ใช้
+    const token = generateToken(user);
+
+    // ส่ง Token ให้ผู้ใช้เพื่อนำไปใช้ในการเรียก API ที่ต้อง Login
+    res.status(200).json({
+      message: "เข้าสู่ระบบสำเร็จ",
+      token,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ตรวจสอบข้อมูลผู้ใช้จาก Token
+// Endpoint นี้ต้อง Login
+app.get("/api/v1/auth/me", authenticateToken, (req, res) => {
+  res.status(200).json({
+    message: "สำเร็จ",
+    data: req.user,
+  });
+});
+
+// GET รายการภาพยนตร์ทั้งหมด
+// รองรับ Pagination, Sort และ Search
+app.get("/api/v1/movies", parsePagination, parseSort, parseSearch, async (req, res, next) => {
+  try {
+    // รับค่าจาก query-parser
+    const { page, limit, offset } = req.pagination;
+    const { field, order } = req.sort;
+    const { q } = req.search;
+
+    // สร้างเงื่อนไขสำหรับค้นหา
+    const conditions = [];
+    const params = [];
+
+    // ถ้ามีคำค้น ให้ค้นจากชื่อหนังหรือชื่อผู้กำกับ
+    if (q) {
+      conditions.push("(title LIKE ? OR director LIKE ?)");
+      params.push(`%${q}%`, `%${q}%`);
+    }
+
+    // สร้าง WHERE เฉพาะเมื่อมีเงื่อนไขค้นหา
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    // ดึงข้อมูลตาม Pagination และ Sort
+    // field และ order ผ่านการตรวจสอบจาก allowlist แล้ว
+    const [rows] = await pool.query(
+      `
+        SELECT id, title, director, release_year
+        FROM movies
+        ${whereClause}
+        ORDER BY ${field} ${order}
+        LIMIT ? OFFSET ?
+        `,
+      [...params, limit, offset],
+    );
+
+    // นับจำนวนข้อมูลทั้งหมดที่ตรงกับคำค้น
+    const [countRows] = await pool.query(
+      `
+        SELECT COUNT(*) AS total
+        FROM movies
+        ${whereClause}
+        `,
+      params,
+    );
+
+    const total = countRows[0].total;
+
+    // คำนวณจำนวนหน้าทั้งหมด
+    const totalPages = Math.ceil(total / limit);
 
     res.status(200).json({
       message: "สำเร็จ",
       data: rows,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     });
   } catch (err) {
     next(err);
@@ -73,7 +267,8 @@ app.get("/api/v1/movies/:id", async (req, res, next) => {
 });
 
 // POST เพิ่มภาพยนตร์
-app.post("/api/v1/movies", async (req, res, next) => {
+// ต้อง Login และได้รับสิทธิ์เป็น Admin เท่านั้น
+app.post("/api/v1/movies", authenticateToken, authorizeRole("admin"), async (req, res, next) => {
   try {
     const { title, director, release_year } = req.body;
 
@@ -115,7 +310,8 @@ app.post("/api/v1/movies", async (req, res, next) => {
 });
 
 // PUT แก้ไขภาพยนตร์
-app.put("/api/v1/movies/:id", async (req, res, next) => {
+// ต้อง Login และได้รับสิทธิ์เป็น Admin เท่านั้น
+app.put("/api/v1/movies/:id", authenticateToken, authorizeRole("admin"), async (req, res, next) => {
   try {
     const { title, director, release_year } = req.body;
 
@@ -135,9 +331,7 @@ app.put("/api/v1/movies/:id", async (req, res, next) => {
       });
     }
 
-    const [existing] = await pool.query("SELECT id FROM movies WHERE id = ?", [
-      req.params.id,
-    ]);
+    const [existing] = await pool.query("SELECT id FROM movies WHERE id = ?", [req.params.id]);
 
     if (existing.length === 0) {
       return res.status(404).json({
@@ -171,11 +365,10 @@ app.put("/api/v1/movies/:id", async (req, res, next) => {
 });
 
 // DELETE ลบภาพยนตร์
-app.delete("/api/v1/movies/:id", async (req, res, next) => {
+// ต้อง Login และได้รับสิทธิ์เป็น Admin เท่านั้น
+app.delete("/api/v1/movies/:id", authenticateToken, authorizeRole("admin"), async (req, res, next) => {
   try {
-    const [result] = await pool.query("DELETE FROM movies WHERE id = ?", [
-      req.params.id,
-    ]);
+    const [result] = await pool.query("DELETE FROM movies WHERE id = ?", [req.params.id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({
@@ -209,7 +402,8 @@ app.get("/api/v1/genres", async (req, res, next) => {
 });
 
 // POST เพิ่มประเภทภาพยนตร์
-app.post("/api/v1/genres", async (req, res, next) => {
+// ต้อง Login และได้รับสิทธิ์เป็น Admin เท่านั้น
+app.post("/api/v1/genres", authenticateToken, authorizeRole("admin"), async (req, res, next) => {
   try {
     const { name } = req.body;
 
@@ -224,9 +418,7 @@ app.post("/api/v1/genres", async (req, res, next) => {
 
     const genreName = name.trim();
 
-    const [result] = await pool.query("INSERT INTO genres (name) VALUES (?)", [
-      genreName,
-    ]);
+    const [result] = await pool.query("INSERT INTO genres (name) VALUES (?)", [genreName]);
 
     res.status(201).json({
       message: "เพิ่มประเภทภาพยนตร์สำเร็จ",
@@ -252,9 +444,7 @@ app.post("/api/v1/genres", async (req, res, next) => {
 // GET ประเภทของภาพยนตร์ตาม ID
 app.get("/api/v1/movies/:id/genres", async (req, res, next) => {
   try {
-    const [movies] = await pool.query("SELECT id FROM movies WHERE id = ?", [
-      req.params.id,
-    ]);
+    const [movies] = await pool.query("SELECT id FROM movies WHERE id = ?", [req.params.id]);
 
     if (movies.length === 0) {
       return res.status(404).json({
@@ -284,17 +474,14 @@ app.get("/api/v1/movies/:id/genres", async (req, res, next) => {
 });
 
 // PUT กำหนดประเภทให้ภาพยนตร์
-app.put("/api/v1/movies/:id/genres", async (req, res, next) => {
+// ต้อง Login และได้รับสิทธิ์เป็น Admin เท่านั้น
+app.put("/api/v1/movies/:id/genres", authenticateToken, authorizeRole("admin"), async (req, res, next) => {
   let connection;
 
   try {
     const { genre_ids } = req.body;
 
-    if (
-      !Array.isArray(genre_ids) ||
-      !genre_ids.every((id) => Number.isInteger(id) && id > 0) ||
-      new Set(genre_ids).size !== genre_ids.length
-    ) {
+    if (!Array.isArray(genre_ids) || !genre_ids.every((id) => Number.isInteger(id) && id > 0) || new Set(genre_ids).size !== genre_ids.length) {
       return res.status(400).json({
         error: {
           code: "VALIDATION_ERROR",
@@ -306,10 +493,7 @@ app.put("/api/v1/movies/:id/genres", async (req, res, next) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [movies] = await connection.query(
-      "SELECT id FROM movies WHERE id = ?",
-      [req.params.id],
-    );
+    const [movies] = await connection.query("SELECT id FROM movies WHERE id = ?", [req.params.id]);
 
     if (movies.length === 0) {
       await connection.rollback();
@@ -323,10 +507,7 @@ app.put("/api/v1/movies/:id/genres", async (req, res, next) => {
     }
 
     if (genre_ids.length > 0) {
-      const [genres] = await connection.query(
-        "SELECT id FROM genres WHERE id IN (?)",
-        [genre_ids],
-      );
+      const [genres] = await connection.query("SELECT id FROM genres WHERE id IN (?)", [genre_ids]);
 
       if (genres.length !== genre_ids.length) {
         await connection.rollback();
@@ -340,20 +521,12 @@ app.put("/api/v1/movies/:id/genres", async (req, res, next) => {
       }
     }
 
-    await connection.query("DELETE FROM movie_genres WHERE movie_id = ?", [
-      req.params.id,
-    ]);
+    await connection.query("DELETE FROM movie_genres WHERE movie_id = ?", [req.params.id]);
 
     if (genre_ids.length > 0) {
-      const values = genre_ids.map((genreId) => [
-        Number(req.params.id),
-        genreId,
-      ]);
+      const values = genre_ids.map((genreId) => [Number(req.params.id), genreId]);
 
-      await connection.query(
-        "INSERT INTO movie_genres (movie_id, genre_id) VALUES ?",
-        [values],
-      );
+      await connection.query("INSERT INTO movie_genres (movie_id, genre_id) VALUES ?", [values]);
     }
 
     await connection.commit();

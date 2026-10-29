@@ -3,19 +3,23 @@ openapi: 3.0.3
 info:
   title: Movie API
   version: 1.0.0
-  description: API สำหรับจัดการภาพยนตร์และประเภทภาพยนตร์
+  description: API สำหรับจัดการภาพยนตร์ ประเภทภาพยนตร์ และระบบ Authentication
 
 servers:
   - url: http://localhost:3000
     description: Local development server
 
 tags:
+  - name: Auth
+    description: ระบบสมัครสมาชิกและเข้าสู่ระบบ
   - name: Movies
     description: จัดการข้อมูลภาพยนตร์
   - name: Genres
     description: จัดการประเภทภาพยนตร์
   - name: Movie Genres
     description: จัดการความสัมพันธ์ระหว่างภาพยนตร์กับประเภท
+  - name: External API
+    description: ค้นหาข้อมูลภาพยนตร์จาก External API
 
 paths:
   /:
@@ -23,6 +27,7 @@ paths:
       summary: ตรวจสอบสถานะ API
       tags:
         - Movies
+
       responses:
         "200":
           description: API พร้อมใช้งาน
@@ -36,32 +41,194 @@ paths:
               example:
                 message: Movie API พร้อมใช้งานแล้ว
 
+  # =========================================================
+  # Authentication
+  # =========================================================
+
+  /api/v1/auth/register:
+    post:
+      summary: สมัครสมาชิก
+      tags:
+        - Auth
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+            example:
+              email: user@example.com
+              password: password123
+
+      responses:
+        "201":
+          description: สมัครสมาชิกสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserResponse"
+
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+        "409":
+          description: อีเมลนี้มีอยู่ในระบบแล้ว
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/auth/login:
+    post:
+      summary: เข้าสู่ระบบ
+      tags:
+        - Auth
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+            example:
+              email: user@example.com
+              password: password123
+
+      responses:
+        "200":
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+        "400":
+          $ref: "#/components/responses/ValidationError"
+
+        "401":
+          description: อีเมลหรือรหัสผ่านไม่ถูกต้อง
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/auth/me:
+    get:
+      summary: ดูข้อมูลผู้ใช้ที่กำลังเข้าสู่ระบบ
+      tags:
+        - Auth
+
+      security:
+        - bearerAuth: []
+
+      responses:
+        "200":
+          description: ดึงข้อมูลผู้ใช้สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUserResponse"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # =========================================================
+  # Movies
+  # =========================================================
+
   /api/v1/movies:
     get:
-      summary: ดึงรายการภาพยนตร์ทั้งหมด
+      summary: ดึงรายการภาพยนตร์
+      description: รองรับ Pagination, Search และ Sort
       tags:
         - Movies
+
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: หมายเลขหน้าที่ต้องการ
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+
+        - name: limit
+          in: query
+          required: false
+          description: จำนวนภาพยนตร์ต่อหน้า
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 8
+          example: 8
+
+        - name: q
+          in: query
+          required: false
+          description: ค้นหาจากชื่อภาพยนตร์หรือผู้กำกับ
+          schema:
+            type: string
+          example: Christopher
+
+        - name: sort
+          in: query
+          required: false
+          description: field ที่ใช้เรียงข้อมูล
+          schema:
+            type: string
+            enum:
+              - id
+              - title
+              - director
+              - release_year
+            default: id
+          example: title
+
+        - name: order
+          in: query
+          required: false
+          description: รูปแบบการเรียงข้อมูล
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: asc
+
       responses:
         "200":
           description: ดึงข้อมูลสำเร็จ
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Movie"
+                $ref: "#/components/schemas/MovieListResponse"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: เพิ่มภาพยนตร์
+      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถเพิ่มภาพยนตร์ได้
       tags:
         - Movies
+
+      security:
+        - bearerAuth: []
+
       requestBody:
         required: true
         content:
@@ -72,6 +239,7 @@ paths:
               title: Test Movie
               director: Test Director
               release_year: 2025
+
       responses:
         "201":
           description: เพิ่มภาพยนตร์สำเร็จ
@@ -79,8 +247,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MovieResponse"
+
         "400":
           $ref: "#/components/responses/ValidationError"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
@@ -92,6 +268,7 @@ paths:
       summary: ดึงรายละเอียดภาพยนตร์ตาม ID
       tags:
         - Movies
+
       responses:
         "200":
           description: พบข้อมูลภาพยนตร์
@@ -99,21 +276,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MovieResponse"
+
         "404":
           $ref: "#/components/responses/NotFound"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     put:
       summary: แก้ไขข้อมูลภาพยนตร์
+      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถแก้ไขภาพยนตร์ได้
       tags:
         - Movies
+
+      security:
+        - bearerAuth: []
+
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/MovieInput"
+
       responses:
         "200":
           description: แก้ไขภาพยนตร์สำเร็จ
@@ -121,17 +306,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/MovieResponse"
+
         "400":
           $ref: "#/components/responses/ValidationError"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
         "404":
           $ref: "#/components/responses/NotFound"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: ลบภาพยนตร์
+      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถลบภาพยนตร์ได้
       tags:
         - Movies
+
+      security:
+        - bearerAuth: []
+
       responses:
         "200":
           description: ลบภาพยนตร์สำเร็จ
@@ -144,16 +343,29 @@ paths:
                     type: string
               example:
                 message: ลบภาพยนตร์สำเร็จ
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
         "404":
           $ref: "#/components/responses/NotFound"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
+
+  # =========================================================
+  # Genres
+  # =========================================================
 
   /api/v1/genres:
     get:
       summary: ดึงรายการประเภทภาพยนตร์ทั้งหมด
       tags:
         - Genres
+
       responses:
         "200":
           description: ดึงข้อมูลสำเร็จ
@@ -168,13 +380,19 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Genre"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: เพิ่มประเภทภาพยนตร์
+      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถเพิ่มประเภทภาพยนตร์ได้
       tags:
         - Genres
+
+      security:
+        - bearerAuth: []
+
       requestBody:
         required: true
         content:
@@ -183,6 +401,7 @@ paths:
               $ref: "#/components/schemas/GenreInput"
             example:
               name: Documentary
+
       responses:
         "201":
           description: เพิ่มประเภทภาพยนตร์สำเร็จ
@@ -190,8 +409,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GenreResponse"
+
         "400":
           $ref: "#/components/responses/ValidationError"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
         "409":
           description: มีชื่อประเภทภาพยนตร์นี้อยู่แล้ว
           content:
@@ -202,8 +429,13 @@ paths:
                 error:
                   code: DUPLICATE_GENRE
                   message: มีประเภทภาพยนตร์นี้อยู่แล้ว
+
         "500":
           $ref: "#/components/responses/InternalServerError"
+
+  # =========================================================
+  # Movie Genres
+  # =========================================================
 
   /api/v1/movies/{id}/genres:
     parameters:
@@ -213,6 +445,7 @@ paths:
       summary: ดึงประเภทของภาพยนตร์
       tags:
         - Movie Genres
+
       responses:
         "200":
           description: ดึงประเภทภาพยนตร์สำเร็จ
@@ -227,16 +460,22 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Genre"
+
         "404":
           $ref: "#/components/responses/NotFound"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     put:
       summary: กำหนดประเภทให้ภาพยนตร์
-      description: แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา
+      description: แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา ผู้ใช้ที่มี role admin เท่านั้น
       tags:
         - Movie Genres
+
+      security:
+        - bearerAuth: []
+
       requestBody:
         required: true
         content:
@@ -245,6 +484,7 @@ paths:
               $ref: "#/components/schemas/MovieGenresInput"
             example:
               genre_ids: [1, 3]
+
       responses:
         "200":
           description: กำหนดประเภทภาพยนตร์สำเร็จ
@@ -265,33 +505,50 @@ paths:
                 message: กำหนดประเภทภาพยนตร์สำเร็จ
                 movie_id: 1
                 genre_ids: [1, 3]
+
         "400":
           description: ข้อมูลไม่ถูกต้องหรือมี Genre ID ที่ไม่มีอยู่
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
               examples:
                 invalidInput:
                   value:
                     error:
                       code: VALIDATION_ERROR
                       message: genre_ids ต้องเป็น array ของ ID จำนวนเต็มบวกที่ไม่ซ้ำกัน
+
                 invalidGenre:
                   value:
                     error:
                       code: INVALID_GENRE_IDS
                       message: มี ID ประเภทภาพยนตร์ที่ไม่มีอยู่ในระบบ
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
         "404":
           $ref: "#/components/responses/NotFound"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
+
+  # =========================================================
+  # External API
+  # =========================================================
+
   /api/v1/external/movies:
     get:
       summary: ค้นหาข้อมูลภาพยนตร์จาก External API
       description: เรียก OMDb API โดยมี Retry, Timeout และ Fallback
       tags:
         - External API
+
       parameters:
         - name: title
           in: query
@@ -300,6 +557,7 @@ paths:
           schema:
             type: string
           example: Inception
+
       responses:
         "200":
           description: ค้นหาสำเร็จ หรือใช้ข้อมูลสำรองเมื่อ External API ล้มเหลว
@@ -310,23 +568,46 @@ paths:
                 properties:
                   source:
                     type: string
-                    enum: [omdb, fallback]
+                    enum:
+                      - omdb
+                      - fallback
                   message:
                     type: string
                   data:
                     type: object
                     nullable: true
                     additionalProperties: true
+
         "400":
           description: ไม่ได้ระบุชื่อภาพยนตร์
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+# ===========================================================
+# Components
+# ===========================================================
+
 components:
+  # ---------------------------------------------------------
+  # Security
+  # ---------------------------------------------------------
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: ใส่ JWT Token ที่ได้จาก /api/v1/auth/login
+
+  # ---------------------------------------------------------
+  # Parameters
+  # ---------------------------------------------------------
+
   parameters:
     Id:
       name: id
@@ -337,6 +618,10 @@ components:
         type: integer
         minimum: 1
 
+  # ---------------------------------------------------------
+  # Schemas
+  # ---------------------------------------------------------
+
   schemas:
     Movie:
       type: object
@@ -344,15 +629,19 @@ components:
         id:
           type: integer
           example: 1
+
         title:
           type: string
           example: Inception
+
         director:
           type: string
           example: Christopher Nolan
+
         release_year:
           type: integer
           example: 2010
+
       required:
         - id
         - title
@@ -361,111 +650,296 @@ components:
 
     MovieInput:
       type: object
+
       required:
         - title
         - director
         - release_year
+
       properties:
         title:
           type: string
           example: Test Movie
+
         director:
           type: string
           example: Test Director
+
         release_year:
           type: integer
           minimum: 1
           example: 2025
 
+    MovieResponse:
+      type: object
+
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+
+        data:
+          $ref: "#/components/schemas/Movie"
+
+    MovieListResponse:
+      type: object
+
+      properties:
+        message:
+          type: string
+          example: สำเร็จ
+
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Movie"
+
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+
+    Pagination:
+      type: object
+
+      properties:
+        page:
+          type: integer
+          example: 1
+
+        limit:
+          type: integer
+          example: 8
+
+        total:
+          type: integer
+          example: 4
+
+        totalPages:
+          type: integer
+          example: 1
+
     Genre:
       type: object
+
       properties:
         id:
           type: integer
           example: 1
+
         name:
           type: string
           example: Sci-Fi
+
       required:
         - id
         - name
 
     GenreInput:
       type: object
+
       required:
         - name
+
       properties:
         name:
           type: string
           example: Documentary
 
-    MovieResponse:
-      type: object
-      properties:
-        message:
-          type: string
-          example: สำเร็จ
-        data:
-          $ref: "#/components/schemas/Movie"
-
     GenreResponse:
       type: object
+
       properties:
         message:
           type: string
           example: เพิ่มประเภทภาพยนตร์สำเร็จ
+
         data:
           $ref: "#/components/schemas/Genre"
 
     MovieGenresInput:
       type: object
+
       required:
         - genre_ids
+
       properties:
         genre_ids:
           type: array
           uniqueItems: true
+
           items:
             type: integer
             minimum: 1
-          example: [1, 3]
+
+          example:
+            - 1
+            - 3
+
+    # -------------------------------------------------------
+    # Auth Schemas
+    # -------------------------------------------------------
+
+    RegisterInput:
+      type: object
+
+      required:
+        - email
+        - password
+
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+        password:
+          type: string
+          format: password
+          minLength: 6
+          example: password123
+
+    LoginInput:
+      type: object
+
+      required:
+        - email
+        - password
+
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+        password:
+          type: string
+          format: password
+          example: password123
+
+    AuthUser:
+      type: object
+
+      properties:
+        id:
+          type: integer
+          example: 1
+
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+        role:
+          type: string
+          enum:
+            - user
+            - admin
+          example: user
+
+    AuthUserResponse:
+      type: object
+
+      properties:
+        message:
+          type: string
+          example: สมัครสมาชิกสำเร็จ
+
+        data:
+          $ref: "#/components/schemas/AuthUser"
+
+    LoginResponse:
+      type: object
+
+      properties:
+        message:
+          type: string
+          example: เข้าสู่ระบบสำเร็จ
+
+        token:
+          type: string
+          description: JWT Token
+
+        data:
+          $ref: "#/components/schemas/AuthUser"
+
+    # -------------------------------------------------------
+    # Error
+    # -------------------------------------------------------
 
     ErrorResponse:
       type: object
+
       properties:
         error:
           type: object
+
           properties:
             code:
               type: string
               example: NOT_FOUND
+
             message:
               type: string
               example: ไม่พบข้อมูลภาพยนตร์
+
           required:
             - code
             - message
+
       required:
         - error
+
+  # ---------------------------------------------------------
+  # Responses
+  # ---------------------------------------------------------
 
   responses:
     ValidationError:
       description: ข้อมูลที่ส่งมาไม่ถูกต้อง
+
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+
           example:
             error:
               code: VALIDATION_ERROR
               message: กรุณาระบุข้อมูลให้ถูกต้อง
 
-    NotFound:
-      description: ไม่พบข้อมูลที่ร้องขอ
+    Unauthorized:
+      description: ไม่มี Token หรือ Token ไม่ถูกต้อง
+
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+
+          example:
+            error:
+              code: NO_TOKEN
+              message: กรุณาเข้าสู่ระบบก่อนใช้งาน
+
+    Forbidden:
+      description: ผู้ใช้ไม่มีสิทธิ์เข้าถึงทรัพยากรนี้
+
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+          example:
+            error:
+              code: FORBIDDEN
+              message: คุณไม่มีสิทธิ์เข้าถึงทรัพยากรนี้
+
+    NotFound:
+      description: ไม่พบข้อมูลที่ร้องขอ
+
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
           example:
             error:
               code: NOT_FOUND
@@ -473,10 +947,12 @@ components:
 
     InternalServerError:
       description: เกิดข้อผิดพลาดภายในระบบ
+
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+
           example:
             error:
               code: INTERNAL_SERVER_ERROR

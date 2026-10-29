@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- ทำให้หน้าเว็บรองรับหน้าจอมือถือ -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Movie API</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header class="header">
+      <h1>Movie API 🎬</h1>
+      <p>ระบบจัดการข้อมูลภาพยนตร์</p>
+    </header>
+
+    <main class="container">
+      <!-- =================== -->
+      <!-- Login -->
+      <!-- =================== -->
+
+      <section class="card">
+        <h2>เข้าสู่ระบบ</h2>
+
+        <!-- ปิด Browser Validation เพื่อให้ JavaScript แสดงข้อความภาษาไทยเอง -->
+        <form id="loginForm" novalidate>
+          <input id="email" type="email" placeholder="Email" />
+
+          <input id="password" type="password" placeholder="Password" />
+
+          <button type="submit">Login</button>
+        </form>
+
+        <p id="loginMessage"></p>
+      </section>
+
+      <!-- =================== -->
+      <!-- Movie Form -->
+      <!-- =================== -->
+
+      <section class="card">
+        <h2 id="formTitle">เพิ่มภาพยนตร์</h2>
+
+        <!-- ปิด Browser Validation เพื่อให้ JavaScript แสดงข้อความภาษาไทยเอง -->
+        <form id="movieForm" novalidate>
+          <input id="movieTitle" type="text" placeholder="ชื่อภาพยนตร์" />
+
+          <input id="movieDirector" type="text" placeholder="ผู้กำกับ" />
+
+          <input id="movieYear" type="number" placeholder="ปีที่ฉาย" min="1" />
+
+          <button type="submit">บันทึกภาพยนตร์</button>
+
+          <button type="button" id="cancelEditButton" class="secondary" hidden>ยกเลิกการแก้ไข</button>
+        </form>
+
+        <p id="movieFormMessage"></p>
+      </section>
+
+      <!-- =================== -->
+      <!-- Search / Sort -->
+      <!-- =================== -->
+
+      <section class="toolbar">
+        <input id="searchInput" type="text" placeholder="ค้นหาชื่อหนังหรือผู้กำกับ..." />
+
+        <select id="sortSelect">
+          <option value="id">เรียงตาม ID</option>
+          <option value="title">ชื่อภาพยนตร์</option>
+          <option value="director">ชื่อผู้กำกับ</option>
+          <option value="release_year">ปีที่ฉายภาพยนตร์</option>
+        </select>
+
+        <select id="orderSelect">
+          <option value="asc">น้อย → มาก / A → Z</option>
+          <option value="desc">มาก → น้อย / Z → A</option>
+        </select>
+
+        <button id="searchButton">ค้นหา</button>
+      </section>
+
+      <!-- =================== -->
+      <!-- Loading -->
+      <!-- =================== -->
+
+      <p id="loading" hidden>กำลังโหลดข้อมูล...</p>
+
+      <!-- =================== -->
+      <!-- Error -->
+      <!-- =================== -->
+
+      <p id="errorMessage"></p>
+
+      <!-- =================== -->
+      <!-- Movie List -->
+      <!-- =================== -->
+
+      <section>
+        <div id="movieList" class="movie-grid"></div>
+      </section>
+
+      <!-- =================== -->
+      <!-- Pagination -->
+      <!-- =================== -->
+
+      <div class="pagination">
+        <button id="previousButton">← ก่อนหน้า</button>
+
+        <span id="pageInfo">หน้า 1</span>
+
+        <button id="nextButton">ถัดไป →</button>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
