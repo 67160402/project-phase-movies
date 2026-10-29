@@ -1,1912 +1,819 @@
 {
   "info": {
-    "_postman_id": "8c1f1a00-9437-4fe6-818a-c67b36ad0397",
-    "name": "Movie API",
-    "description": "API สำหรับจัดการภาพยนตร์และประเภทภาพยนตร์",
+    "_postman_id": "2dff48b2-3387-4e9a-b96e-af3772f850c6",
+    "name": "Huto Movie API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "56559347",
-    "_collection_link": "https://go.postman.co/collection/56559347-8c1f1a00-9437-4fe6-818a-c67b36ad0397?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/56559347-2dff48b2-3387-4e9a-b96e-af3772f850c6?source=collection_link"
   },
   "item": [
     {
-      "name": "/",
+      "name": "Auth",
       "item": [
         {
-          "name": "ตรวจสอบสถานะ API",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
-            }
-          },
-          "response": [
+          "name": "Admin Login",
+          "item": [
             {
-              "name": "API พร้อมใช้งาน",
-              "originalRequest": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
+              "name": "Login Admin",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "const json = pm.response.json();\r\n\r\npm.environment.set(\"adminToken\", json.token);\r\n\r\npm.test(\"Admin Login สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"ได้รับ Admin Token\", function () {\r\n    pm.expect(json.token).to.be.a(\"string\");\r\n});"
+                    ]
                   }
-                ],
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"newuser@example.com\",\r\n  \"password\": \"1234\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
-                  "raw": "{{baseUrl}}/",
+                  "raw": "{{baseUrl}}/auth/login",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
-                    ""
+                    "auth",
+                    "login"
                   ]
                 }
               },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"message\": \"Movie API พร้อมใช้งานแล้ว\"\n}"
+              "response": []
             }
           ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"newmanuser20261030@example.com\",\r\n  \"password\": \"1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Login สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"ได้รับ Token\", function () {\r\n    pm.expect(json.token).to.exist;\r\n});\r\n\r\npm.environment.set(\"authToken\", json.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"newmanuser20261030@example.com\",\r\n  \"password\": \"1234\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Auth Me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Get Me สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"มีข้อมูลผู้ใช้\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json.data).to.have.property(\"email\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "api",
+      "name": "Movies",
       "item": [
         {
-          "name": "v1",
-          "item": [
+          "name": "Get Movies",
+          "event": [
             {
-              "name": "movies",
-              "item": [
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Get Movies สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response มี data\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json).to.have.property(\"data\");\r\n});\r\n\r\npm.test(\"Response มี pagination\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json).to.have.property(\"pagination\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies?page=1&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ],
+              "query": [
                 {
-                  "name": "{id}",
-                  "item": [
-                    {
-                      "name": "genres",
-                      "item": [
-                        {
-                          "name": "ดึงประเภทของภาพยนตร์",
-                          "request": {
-                            "method": "GET",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id",
-                                "genres"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "response": [
-                            {
-                              "name": "ดึงประเภทภาพยนตร์สำเร็จ",
-                              "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "OK",
-                              "code": 200,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"message\": \"string\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Sci-Fi\"\n    },\n    {\n      \"id\": 1,\n      \"name\": \"Sci-Fi\"\n    }\n  ]\n}"
-                            },
-                            {
-                              "name": "ไม่พบข้อมูลที่ร้องขอ",
-                              "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "Not Found",
-                              "code": 404,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบข้อมูลภาพยนตร์\"\n  }\n}"
-                            },
-                            {
-                              "name": "เกิดข้อผิดพลาดภายในระบบ",
-                              "originalRequest": {
-                                "method": "GET",
-                                "header": [
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "Internal Server Error",
-                              "code": 500,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                            }
-                          ]
-                        },
-                        {
-                          "name": "กำหนดประเภทให้ภาพยนตร์",
-                          "request": {
-                            "method": "PUT",
-                            "header": [
-                              {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                              },
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "body": {
-                              "mode": "raw",
-                              "raw": "{\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}",
-                              "options": {
-                                "raw": {
-                                  "headerFamily": "json",
-                                  "language": "json"
-                                }
-                              }
-                            },
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id",
-                                "genres"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            },
-                            "description": "แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา"
-                          },
-                          "response": [
-                            {
-                              "name": "กำหนดประเภทภาพยนตร์สำเร็จ",
-                              "originalRequest": {
-                                "method": "PUT",
-                                "header": [
-                                  {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                  },
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "body": {
-                                  "mode": "raw",
-                                  "raw": "{\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}",
-                                  "options": {
-                                    "raw": {
-                                      "headerFamily": "json",
-                                      "language": "json"
-                                    }
-                                  }
-                                },
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "OK",
-                              "code": 200,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"message\": \"กำหนดประเภทภาพยนตร์สำเร็จ\",\n  \"movie_id\": 1,\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}"
-                            },
-                            {
-                              "name": "ข้อมูลไม่ถูกต้องหรือมี Genre ID ที่ไม่มีอยู่",
-                              "originalRequest": {
-                                "method": "PUT",
-                                "header": [
-                                  {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                  },
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "body": {
-                                  "mode": "raw",
-                                  "raw": "{\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}",
-                                  "options": {
-                                    "raw": {
-                                      "headerFamily": "json",
-                                      "language": "json"
-                                    }
-                                  }
-                                },
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "Bad Request",
-                              "code": 400,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"genre_ids ต้องเป็น array ของ ID จำนวนเต็มบวกที่ไม่ซ้ำกัน\"\n  }\n}"
-                            },
-                            {
-                              "name": "ไม่พบข้อมูลที่ร้องขอ",
-                              "originalRequest": {
-                                "method": "PUT",
-                                "header": [
-                                  {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                  },
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "body": {
-                                  "mode": "raw",
-                                  "raw": "{\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}",
-                                  "options": {
-                                    "raw": {
-                                      "headerFamily": "json",
-                                      "language": "json"
-                                    }
-                                  }
-                                },
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "Not Found",
-                              "code": 404,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบข้อมูลภาพยนตร์\"\n  }\n}"
-                            },
-                            {
-                              "name": "เกิดข้อผิดพลาดภายในระบบ",
-                              "originalRequest": {
-                                "method": "PUT",
-                                "header": [
-                                  {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                  },
-                                  {
-                                    "key": "Accept",
-                                    "value": "application/json"
-                                  }
-                                ],
-                                "body": {
-                                  "mode": "raw",
-                                  "raw": "{\n  \"genre_ids\": [\n    1,\n    3\n  ]\n}",
-                                  "options": {
-                                    "raw": {
-                                      "headerFamily": "json",
-                                      "language": "json"
-                                    }
-                                  }
-                                },
-                                "url": {
-                                  "raw": "{{baseUrl}}/api/v1/movies/:id/genres",
-                                  "host": [
-                                    "{{baseUrl}}"
-                                  ],
-                                  "path": [
-                                    "api",
-                                    "v1",
-                                    "movies",
-                                    ":id",
-                                    "genres"
-                                  ],
-                                  "variable": [
-                                    {
-                                      "key": "id",
-                                      "value": "8807",
-                                      "description": "ID ของภาพยนตร์"
-                                    }
-                                  ]
-                                }
-                              },
-                              "status": "Internal Server Error",
-                              "code": 500,
-                              "_postman_previewlanguage": "json",
-                              "header": [
-                                {
-                                  "key": "Content-Type",
-                                  "value": "application/json"
-                                }
-                              ],
-                              "cookie": [],
-                              "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "ดึงรายละเอียดภาพยนตร์ตาม ID",
-                      "request": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies/:id",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies",
-                            ":id"
-                          ],
-                          "variable": [
-                            {
-                              "key": "id",
-                              "value": "8807",
-                              "description": "ID ของภาพยนตร์"
-                            }
-                          ]
-                        }
-                      },
-                      "response": [
-                        {
-                          "name": "พบข้อมูลภาพยนตร์",
-                          "originalRequest": {
-                            "method": "GET",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "OK",
-                          "code": 200,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Inception\",\n    \"director\": \"Christopher Nolan\",\n    \"release_year\": 2010\n  }\n}"
-                        },
-                        {
-                          "name": "ไม่พบข้อมูลที่ร้องขอ",
-                          "originalRequest": {
-                            "method": "GET",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Not Found",
-                          "code": 404,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบข้อมูลภาพยนตร์\"\n  }\n}"
-                        },
-                        {
-                          "name": "เกิดข้อผิดพลาดภายในระบบ",
-                          "originalRequest": {
-                            "method": "GET",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Internal Server Error",
-                          "code": 500,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "แก้ไขข้อมูลภาพยนตร์",
-                      "request": {
-                        "method": "PUT",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies/:id",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies",
-                            ":id"
-                          ],
-                          "variable": [
-                            {
-                              "key": "id",
-                              "value": "8807",
-                              "description": "ID ของภาพยนตร์"
-                            }
-                          ]
-                        }
-                      },
-                      "response": [
-                        {
-                          "name": "แก้ไขภาพยนตร์สำเร็จ",
-                          "originalRequest": {
-                            "method": "PUT",
-                            "header": [
-                              {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                              },
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "body": {
-                              "mode": "raw",
-                              "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                              "options": {
-                                "raw": {
-                                  "headerFamily": "json",
-                                  "language": "json"
-                                }
-                              }
-                            },
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "OK",
-                          "code": 200,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Inception\",\n    \"director\": \"Christopher Nolan\",\n    \"release_year\": 2010\n  }\n}"
-                        },
-                        {
-                          "name": "ข้อมูลที่ส่งมาไม่ถูกต้อง",
-                          "originalRequest": {
-                            "method": "PUT",
-                            "header": [
-                              {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                              },
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "body": {
-                              "mode": "raw",
-                              "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                              "options": {
-                                "raw": {
-                                  "headerFamily": "json",
-                                  "language": "json"
-                                }
-                              }
-                            },
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Bad Request",
-                          "code": 400,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"กรุณาระบุข้อมูลให้ถูกต้อง\"\n  }\n}"
-                        },
-                        {
-                          "name": "ไม่พบข้อมูลที่ร้องขอ",
-                          "originalRequest": {
-                            "method": "PUT",
-                            "header": [
-                              {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                              },
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "body": {
-                              "mode": "raw",
-                              "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                              "options": {
-                                "raw": {
-                                  "headerFamily": "json",
-                                  "language": "json"
-                                }
-                              }
-                            },
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Not Found",
-                          "code": 404,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบข้อมูลภาพยนตร์\"\n  }\n}"
-                        },
-                        {
-                          "name": "เกิดข้อผิดพลาดภายในระบบ",
-                          "originalRequest": {
-                            "method": "PUT",
-                            "header": [
-                              {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                              },
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "body": {
-                              "mode": "raw",
-                              "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                              "options": {
-                                "raw": {
-                                  "headerFamily": "json",
-                                  "language": "json"
-                                }
-                              }
-                            },
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Internal Server Error",
-                          "code": 500,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                        }
-                      ]
-                    },
-                    {
-                      "name": "ลบภาพยนตร์",
-                      "request": {
-                        "method": "DELETE",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies/:id",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies",
-                            ":id"
-                          ],
-                          "variable": [
-                            {
-                              "key": "id",
-                              "value": "8807",
-                              "description": "ID ของภาพยนตร์"
-                            }
-                          ]
-                        }
-                      },
-                      "response": [
-                        {
-                          "name": "ลบภาพยนตร์สำเร็จ",
-                          "originalRequest": {
-                            "method": "DELETE",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "OK",
-                          "code": 200,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"message\": \"ลบภาพยนตร์สำเร็จ\"\n}"
-                        },
-                        {
-                          "name": "ไม่พบข้อมูลที่ร้องขอ",
-                          "originalRequest": {
-                            "method": "DELETE",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Not Found",
-                          "code": 404,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"NOT_FOUND\",\n    \"message\": \"ไม่พบข้อมูลภาพยนตร์\"\n  }\n}"
-                        },
-                        {
-                          "name": "เกิดข้อผิดพลาดภายในระบบ",
-                          "originalRequest": {
-                            "method": "DELETE",
-                            "header": [
-                              {
-                                "key": "Accept",
-                                "value": "application/json"
-                              }
-                            ],
-                            "url": {
-                              "raw": "{{baseUrl}}/api/v1/movies/:id",
-                              "host": [
-                                "{{baseUrl}}"
-                              ],
-                              "path": [
-                                "api",
-                                "v1",
-                                "movies",
-                                ":id"
-                              ],
-                              "variable": [
-                                {
-                                  "key": "id",
-                                  "value": "8807",
-                                  "description": "ID ของภาพยนตร์"
-                                }
-                              ]
-                            }
-                          },
-                          "status": "Internal Server Error",
-                          "code": 500,
-                          "_postman_previewlanguage": "json",
-                          "header": [
-                            {
-                              "key": "Content-Type",
-                              "value": "application/json"
-                            }
-                          ],
-                          "cookie": [],
-                          "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                        }
-                      ]
-                    }
-                  ]
+                  "key": "page",
+                  "value": "1"
                 },
                 {
-                  "name": "ดึงรายการภาพยนตร์ทั้งหมด",
-                  "request": {
-                    "method": "GET",
-                    "header": [
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
-                      }
-                    ],
-                    "url": {
-                      "raw": "{{baseUrl}}/api/v1/movies",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "movies"
-                      ]
-                    }
-                  },
-                  "response": [
-                    {
-                      "name": "ดึงข้อมูลสำเร็จ",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "OK",
-                      "code": 200,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"message\": \"string\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"title\": \"Inception\",\n      \"director\": \"Christopher Nolan\",\n      \"release_year\": 2010\n    },\n    {\n      \"id\": 1,\n      \"title\": \"Inception\",\n      \"director\": \"Christopher Nolan\",\n      \"release_year\": 2010\n    }\n  ]\n}"
-                    },
-                    {
-                      "name": "เกิดข้อผิดพลาดภายในระบบ",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "Internal Server Error",
-                      "code": 500,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                    }
-                  ]
-                },
-                {
-                  "name": "เพิ่มภาพยนตร์",
-                  "request": {
-                    "method": "POST",
-                    "header": [
-                      {
-                        "key": "Content-Type",
-                        "value": "application/json"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
-                      }
-                    ],
-                    "body": {
-                      "mode": "raw",
-                      "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                      "options": {
-                        "raw": {
-                          "headerFamily": "json",
-                          "language": "json"
-                        }
-                      }
-                    },
-                    "url": {
-                      "raw": "{{baseUrl}}/api/v1/movies",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "movies"
-                      ]
-                    }
-                  },
-                  "response": [
-                    {
-                      "name": "เพิ่มภาพยนตร์สำเร็จ",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "Created",
-                      "code": 201,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"message\": \"สำเร็จ\",\n  \"data\": {\n    \"id\": 1,\n    \"title\": \"Inception\",\n    \"director\": \"Christopher Nolan\",\n    \"release_year\": 2010\n  }\n}"
-                    },
-                    {
-                      "name": "ข้อมูลที่ส่งมาไม่ถูกต้อง",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "Bad Request",
-                      "code": 400,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"กรุณาระบุข้อมูลให้ถูกต้อง\"\n  }\n}"
-                    },
-                    {
-                      "name": "เกิดข้อผิดพลาดภายในระบบ",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"title\": \"Test Movie\",\n  \"director\": \"Test Director\",\n  \"release_year\": 2025\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/movies",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "Internal Server Error",
-                      "code": 500,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "genres",
-              "item": [
-                {
-                  "name": "ดึงรายการประเภทภาพยนตร์ทั้งหมด",
-                  "request": {
-                    "method": "GET",
-                    "header": [
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
-                      }
-                    ],
-                    "url": {
-                      "raw": "{{baseUrl}}/api/v1/genres",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "genres"
-                      ]
-                    }
-                  },
-                  "response": [
-                    {
-                      "name": "ดึงข้อมูลสำเร็จ",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "OK",
-                      "code": 200,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"message\": \"string\",\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Sci-Fi\"\n    },\n    {\n      \"id\": 1,\n      \"name\": \"Sci-Fi\"\n    }\n  ]\n}"
-                    },
-                    {
-                      "name": "เกิดข้อผิดพลาดภายในระบบ",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "Internal Server Error",
-                      "code": 500,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                    }
-                  ]
-                },
-                {
-                  "name": "เพิ่มประเภทภาพยนตร์",
-                  "request": {
-                    "method": "POST",
-                    "header": [
-                      {
-                        "key": "Content-Type",
-                        "value": "application/json"
-                      },
-                      {
-                        "key": "Accept",
-                        "value": "application/json"
-                      }
-                    ],
-                    "body": {
-                      "mode": "raw",
-                      "raw": "{\n  \"name\": \"Documentary\"\n}",
-                      "options": {
-                        "raw": {
-                          "headerFamily": "json",
-                          "language": "json"
-                        }
-                      }
-                    },
-                    "url": {
-                      "raw": "{{baseUrl}}/api/v1/genres",
-                      "host": [
-                        "{{baseUrl}}"
-                      ],
-                      "path": [
-                        "api",
-                        "v1",
-                        "genres"
-                      ]
-                    }
-                  },
-                  "response": [
-                    {
-                      "name": "เพิ่มประเภทภาพยนตร์สำเร็จ",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"name\": \"Documentary\"\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "Created",
-                      "code": 201,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"message\": \"เพิ่มประเภทภาพยนตร์สำเร็จ\",\n  \"data\": {\n    \"id\": 1,\n    \"name\": \"Sci-Fi\"\n  }\n}"
-                    },
-                    {
-                      "name": "ข้อมูลที่ส่งมาไม่ถูกต้อง",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"name\": \"Documentary\"\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "Bad Request",
-                      "code": 400,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"กรุณาระบุข้อมูลให้ถูกต้อง\"\n  }\n}"
-                    },
-                    {
-                      "name": "มีชื่อประเภทภาพยนตร์นี้อยู่แล้ว",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"name\": \"Documentary\"\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "Conflict",
-                      "code": 409,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"DUPLICATE_GENRE\",\n    \"message\": \"มีประเภทภาพยนตร์นี้อยู่แล้ว\"\n  }\n}"
-                    },
-                    {
-                      "name": "เกิดข้อผิดพลาดภายในระบบ",
-                      "originalRequest": {
-                        "method": "POST",
-                        "header": [
-                          {
-                            "key": "Content-Type",
-                            "value": "application/json"
-                          },
-                          {
-                            "key": "Accept",
-                            "value": "application/json"
-                          }
-                        ],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "{\n  \"name\": \"Documentary\"\n}",
-                          "options": {
-                            "raw": {
-                              "headerFamily": "json",
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "{{baseUrl}}/api/v1/genres",
-                          "host": [
-                            "{{baseUrl}}"
-                          ],
-                          "path": [
-                            "api",
-                            "v1",
-                            "genres"
-                          ]
-                        }
-                      },
-                      "status": "Internal Server Error",
-                      "code": 500,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "Content-Type",
-                          "value": "application/json"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"INTERNAL_SERVER_ERROR\",\n    \"message\": \"เกิดข้อผิดพลาดภายในระบบ\"\n  }\n}"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "name": "External",
-              "item": [
-                {
-                  "name": "ดึงรายการภาพยนต์สำรอง",
-                  "request": {
-                    "method": "GET",
-                    "header": [],
-                    "body": {
-                      "mode": "raw",
-                      "raw": "",
-                      "options": {
-                        "raw": {
-                          "language": "json"
-                        }
-                      }
-                    },
-                    "url": {
-                      "raw": "http://localhost:3000/api/v1/external/movies?title=Inception",
-                      "protocol": "http",
-                      "host": [
-                        "localhost"
-                      ],
-                      "port": "3000",
-                      "path": [
-                        "api",
-                        "v1",
-                        "external",
-                        "movies"
-                      ],
-                      "query": [
-                        {
-                          "key": "title",
-                          "value": "Inception"
-                        }
-                      ]
-                    }
-                  },
-                  "response": [
-                    {
-                      "name": "ดึงข้อมูลสำรองสำเร็จ",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [],
-                        "body": {
-                          "mode": "raw",
-                          "raw": "",
-                          "options": {
-                            "raw": {
-                              "language": "json"
-                            }
-                          }
-                        },
-                        "url": {
-                          "raw": "http://localhost:3000/api/v1/external/movies?title=Inception",
-                          "protocol": "http",
-                          "host": [
-                            "localhost"
-                          ],
-                          "port": "3000",
-                          "path": [
-                            "api",
-                            "v1",
-                            "external",
-                            "movies"
-                          ],
-                          "query": [
-                            {
-                              "key": "title",
-                              "value": "Inception"
-                            }
-                          ]
-                        }
-                      },
-                      "status": "OK",
-                      "code": 200,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "x-powered-by",
-                          "value": "Express"
-                        },
-                        {
-                          "key": "content-type",
-                          "value": "application/json; charset=utf-8"
-                        },
-                        {
-                          "key": "content-length",
-                          "value": "1228"
-                        },
-                        {
-                          "key": "etag",
-                          "value": "W/\"4cc-Pl48AgFR91QlIsF+yvC1DV1olMI\""
-                        },
-                        {
-                          "key": "date",
-                          "value": "Sun, 11 Oct 2026 16:37:58 GMT"
-                        },
-                        {
-                          "key": "connection",
-                          "value": "keep-alive"
-                        },
-                        {
-                          "key": "keep-alive",
-                          "value": "timeout=5"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"source\": \"omdb\",\n  \"message\": \"ค้นหาข้อมูลภาพยนตร์จาก External API สำเร็จ\",\n  \"data\": {\n    \"Title\": \"Inception\",\n    \"Year\": \"2010\",\n    \"Rated\": \"PG-13\",\n    \"Released\": \"16 Jul 2010\",\n    \"Runtime\": \"148 min\",\n    \"Genre\": \"Adventure, Sci-Fi, Thriller\",\n    \"Director\": \"Christopher Nolan\",\n    \"Writer\": \"Christopher Nolan\",\n    \"Actors\": \"Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page\",\n    \"Plot\": \"A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO, but his tragic past may doom the project and his team to disaster.\",\n    \"Language\": \"English, Japanese, French\",\n    \"Country\": \"United Kingdom, United States\",\n    \"Awards\": \"Won 4 Oscars. 160 wins & 220 nominations total\",\n    \"Poster\": \"https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_QL75_UX380_CR0,0,380,562_.jpg\",\n    \"Ratings\": [\n      {\n        \"Source\": \"Internet Movie Database\",\n        \"Value\": \"8.8/10\"\n      },\n      {\n        \"Source\": \"Rotten Tomatoes\",\n        \"Value\": \"86%\"\n      },\n      {\n        \"Source\": \"Metacritic\",\n        \"Value\": \"74/100\"\n      }\n    ],\n    \"Metascore\": \"74\",\n    \"imdbRating\": \"8.8\",\n    \"imdbVotes\": \"2,877,173\",\n    \"imdbID\": \"tt1375666\",\n    \"Type\": \"movie\",\n    \"DVD\": \"N/A\",\n    \"BoxOffice\": \"$292,587,330\",\n    \"Production\": \"N/A\",\n    \"Website\": \"N/A\",\n    \"Response\": \"True\"\n  }\n}"
-                    },
-                    {
-                      "name": "ดึงข้อมูลไม่สำเร็จ ไม่พบ title",
-                      "originalRequest": {
-                        "method": "GET",
-                        "header": [
-                          {
-                            "key": "Origin",
-                            "value": "http://malicious-site.example.com"
-                          }
-                        ],
-                        "url": {
-                          "raw": "http://localhost:3000/api/v1/external/movies",
-                          "protocol": "http",
-                          "host": [
-                            "localhost"
-                          ],
-                          "port": "3000",
-                          "path": [
-                            "api",
-                            "v1",
-                            "external",
-                            "movies"
-                          ]
-                        }
-                      },
-                      "status": "Bad Request",
-                      "code": 400,
-                      "_postman_previewlanguage": "json",
-                      "header": [
-                        {
-                          "key": "x-powered-by",
-                          "value": "Express"
-                        },
-                        {
-                          "key": "content-type",
-                          "value": "application/json; charset=utf-8"
-                        },
-                        {
-                          "key": "content-length",
-                          "value": "132"
-                        },
-                        {
-                          "key": "etag",
-                          "value": "W/\"84-Z3CNKow0CbfzlQKz+NBvS3guk0Y\""
-                        },
-                        {
-                          "key": "date",
-                          "value": "Sun, 11 Oct 2026 16:41:22 GMT"
-                        },
-                        {
-                          "key": "connection",
-                          "value": "keep-alive"
-                        },
-                        {
-                          "key": "keep-alive",
-                          "value": "timeout=5"
-                        }
-                      ],
-                      "cookie": [],
-                      "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"ระบุชื่อภาพยนตร์ผ่าน query parameter title\"\n  }\n}"
-                    }
-                  ]
+                  "key": "limit",
+                  "value": "5"
                 }
               ]
             }
-          ]
+          },
+          "response": []
+        },
+        {
+          "name": "Get Movie By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Get Movie By ID สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"มีข้อมูลภาพยนตร์\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json.data).to.have.property(\"id\");\r\n    pm.expect(json.data).to.have.property(\"title\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Create Movie สำเร็จ\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"สร้าง Movie และได้รับ ID\", function () {\r\n    pm.expect(json.data).to.have.property(\"id\");\r\n});\r\n\r\npm.environment.set(\"movieId\", json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Newman Test Movie\",\r\n  \"director\": \"Huto Director\",\r\n  \"release_year\": 2026\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"แก้ไข Movie สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"ข้อมูล Movie ถูกแก้ไข\", function () {\r\n    pm.expect(json.data).to.have.property(\"id\");\r\n    pm.expect(json.data.title).to.eql(\"Newman Test Movie Updated\");\r\n    pm.expect(json.data.director).to.eql(\"Huto Director Updated\");\r\n    pm.expect(json.data.release_year).to.eql(2025);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Newman Test Movie Updated\",\r\n  \"director\": \"Huto Director Updated\",\r\n  \"release_year\": 2025\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{movieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies",
+                "{{movieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Delete Movie สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response แจ้งว่าลบสำเร็จ\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json.message).to.eql(\"ลบภาพยนตร์สำเร็จ\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{movieId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies",
+                "{{movieId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Movie For Genre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"สร้าง Movie สำหรับทดสอบ Genre สำเร็จ\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"ได้รับ Movie ID\", function () {\r\n    pm.expect(json.data).to.have.property(\"id\");\r\n});\r\n\r\npm.environment.set(\"movieId\", json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Genre Test Movie\",\r\n  \"director\": \"Huto Genre Director\",\r\n  \"release_year\": 2026\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RBAC User Create Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"User ไม่มีสิทธิ์สร้าง Movie\", function () {\r\n    pm.response.to.have.status(403);\r\n});\r\n\r\npm.test(\"Response เป็น Forbidden\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json.error).to.have.property(\"code\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{authToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"RBAC User Test\",\r\n  \"director\": \"Normal User\",\r\n  \"release_year\": 2026\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RBAC No Token Create Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"ไม่มี Token ต้องถูกปฏิเสธ\", function () {\r\n    pm.response.to.have.status(401);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"No Token Test\",\r\n  \"director\": \"No Auth\",\r\n  \"release_year\": 2026\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "RBAC Admin Create Movie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Admin สามารถสร้าง Movie ได้\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"สร้าง Movie สำเร็จและมี ID\", function () {\r\n    pm.expect(json.data).to.have.property(\"id\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"RBAC Admin Test\",\r\n  \"director\": \"Admin Director\",\r\n  \"release_year\": 2026\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies"
+              ]
+            }
+          },
+          "response": []
         }
       ]
-    }
-  ],
-  "variable": [
+    },
     {
-      "key": "baseUrl",
-      "value": "http://localhost:3000"
+      "name": "Genres",
+      "item": [
+        {
+          "name": "Get Genres",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Get Genres สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response มี data\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json).to.have.property(\"data\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "genres"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Genre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Create Genre สำเร็จ\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\npm.test(\"สร้าง Genre และได้รับ ID\", function () {\r\n    pm.expect(json.data.id).to.exist;\r\n});\r\n\r\npm.environment.set(\"genreId\", json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Newman Test 300 Genre\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/genres",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "genres"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Movie Genres",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"กำหนด Genre ให้ Movie สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response มี movie_id\", function () {\r\n    pm.expect(json).to.have.property(\"movie_id\");\r\n});\r\n\r\npm.test(\"Response มี genre_ids\", function () {\r\n    pm.expect(json).to.have.property(\"genre_ids\");\r\n    pm.expect(json.genre_ids).to.include(\r\n        Number(pm.environment.get(\"genreId\"))\r\n    );\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"genre_ids\": [\r\n    {{genreId}}\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{movieId}}/genres",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies",
+                "{{movieId}}",
+                "genres"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Movie Genres",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Get Movie Genres สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response มี data\", function () {\r\n    pm.expect(json).to.have.property(\"data\");\r\n});\r\n\r\npm.test(\"Movie มี Genre ที่กำหนดไว้\", function () {\r\n    const genreId = Number(pm.environment.get(\"genreId\"));\r\n\r\n    pm.expect(json.data.some((genre) => Number(genre.id) === genreId)).to.eql(true);\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{movieId}}/genres",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movies",
+                "{{movieId}}",
+                "genres"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "External",
+      "item": [
+        {
+          "name": "External Movie Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"External API สำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"ได้รับ Response จาก External API\", function () {\r\n    pm.expect(json).to.have.property(\"source\");\r\n    pm.expect(json).to.have.property(\"message\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/external/movies?title=The Matrix",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "external",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "The Matrix"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "External Movie Validation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"ไม่ส่ง title ต้องได้ 400\", function () {\r\n    pm.response.to.have.status(400);\r\n});\r\n\r\npm.test(\"มี Error Response\", function () {\r\n    const json = pm.response.json();\r\n    pm.expect(json).to.have.property(\"error\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/external/movies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "external",
+                "movies"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "External Movie Fallback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();\r\n\r\npm.test(\"Fallback API ยังตอบกลับสำเร็จ\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response ใช้ Fallback\", function () {\r\n    pm.expect(json.source).to.eql(\"fallback\");\r\n});\r\n\r\npm.test(\"Fallback มีข้อมูลสำรอง\", function () {\r\n    pm.expect(json.data).to.have.property(\"Title\");\r\n    pm.expect(json.data).to.have.property(\"Year\");\r\n    pm.expect(json.data).to.have.property(\"Plot\");\r\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/external/movies?title=Fallback Test Movie",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "external",
+                "movies"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "Fallback Test Movie"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

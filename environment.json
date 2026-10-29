@@ -1,0 +1,40 @@
+{
+  "id": "d3fe10cd-827e-4d40-a698-19effde3d232",
+  "name": "Movie API",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "movieId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "genreId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "color": 240,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-10-29T16:12:18.657Z",
+  "_postman_exported_using": "Postman/12.34.3"
+}

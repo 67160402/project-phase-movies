@@ -593,6 +593,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server กำลังทำงานที่ http://localhost:${PORT}`);
-});
+// เปิด Server เฉพาะที่เปิด index.js โดยตรง ไม่เปิดเมื่อถูก require จากไฟล์อื่น (เช่น Jest)
+// ถ้าไฟล์นี้ถูกเรียกจาก Jest จะไม่เปิด Port 3000 ซ้ำ
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server กำลังทำงานที่ http://localhost:${PORT}`);
+  });
+}
+
+// ส่ง Express app ออกไปให้ Jest / Supertest สามารถนำไปทดสอบได้
+module.exports = app;
