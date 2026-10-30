@@ -1,5 +1,5 @@
 const request = require("supertest");
-const app = require("../index");
+const app = require("../src/index");
 
 // เก็บ Token ที่สร้างจากชุด RBAC ไว้ใช้ร่วมกับ Test ชุดอื่น
 // เพื่อไม่ให้การทดสอบ Login ซ้ำจนชน Rate Limiter

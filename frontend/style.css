@@ -1,206 +1,389 @@
-/* ตั้งค่าพื้นฐานของหน้าเว็บ */
+/* =====================================================
+   ตัวแปรสี (แก้สีทั้งเว็บได้จากตรงนี้ที่เดียว)
+   ===================================================== */
+:root {
+  --bg: #0f0f10; /* พื้นหลังหน้าเว็บ (ดำ) */
+  --surface: #19191b; /* พื้นของการ์ดและกล่องต่างๆ (เทาเข้ม) */
+  --border: #2e2e32; /* สีเส้นขอบ (เทา) */
+  --text: #ededed; /* สีตัวอักษรหลัก */
+  --muted: #9a9a9f; /* สีตัวอักษรรอง (เทาจาง) */
+  --accent: #e03131; /* สีเด่นของเว็บ (แดง) ใช้กับปุ่มหลักและเส้นใต้ header */
+  --accent-ink: #ffffff; /* สีตัวอักษรบนปุ่มสีแดง */
+  --danger: #ff6b6b; /* สีแดงอ่อนสำหรับปุ่มลบและ Error */
+  --radius: 10px; /* ความมนของมุมการ์ด */
+}
+
+/* ให้ padding และ border นับรวมในความกว้าง ช่วยให้จัดขนาดง่ายขึ้น */
 * {
   box-sizing: border-box;
 }
 
+/* ค่าพื้นฐานของทั้งหน้า */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  color: #222;
+  font-family: "Sarabun", "Noto Sans Thai", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* ส่วนหัว */
+/* หัวข้อทุกระดับใช้ฟอนต์ Prompt */
+h1,
+h2,
+h3 {
+  font-family: "Prompt", "Sarabun", sans-serif;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+}
+
+/* =====================================================
+   ส่วนหัวของเว็บ
+   ===================================================== */
 .header {
-  background: #222;
-  color: white;
-  padding: 30px 20px;
-  text-align: center;
+  border-bottom: 3px solid var(--accent); /* เส้นแดงใต้ header */
+  background: linear-gradient(180deg, #1c1c1e, var(--bg)); /* ไล่สีให้กลืนกับพื้นหลัง */
+}
+
+.header-inner {
+  max-width: 1100px; /* ความกว้างสูงสุดเท่ากับเนื้อหาด้านล่าง */
+  margin: 0 auto;
+  padding: 28px 20px 22px;
 }
 
 .header h1 {
-  margin: 0 0 8px;
+  font-size: 2.2rem;
 }
 
 .header p {
-  margin: 0;
-  color: #ddd;
+  margin: 4px 0 0;
+  color: var(--muted);
 }
 
-/* กำหนดความกว้างของเนื้อหา */
+/* กรอบเนื้อหาหลัก จัดกึ่งกลางหน้า */
 .container {
   max-width: 1100px;
-  margin: 30px auto;
+  margin: 28px auto;
   padding: 0 20px;
 }
 
-/* กล่องแต่ละส่วน */
-.card {
-  background: white;
-  padding: 20px;
+/* =====================================================
+   การ์ด Login และฟอร์มเพิ่มหนัง
+   ===================================================== */
+
+/* แบ่งเป็น 2 คอลัมน์ เท่ากัน (ซ้าย Login ขวาสมัครสมาชิก) */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
   margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
 }
 
 .card h2 {
-  margin-top: 0;
+  font-size: 1.15rem;
+  margin-bottom: 14px;
 }
 
-/* Form */
+/* ฟอร์ม: ช่องกรอกเรียงต่อกัน ถ้าที่ไม่พอจะขึ้นบรรทัดใหม่เอง */
 form {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
+/* การ์ดฟอร์มเพิ่มหนัง กว้างเต็มแถว */
+.movie-form-card {
+  margin-bottom: 28px;
+}
+
+/* =====================================================
+   ช่องกรอก, dropdown และปุ่ม
+   ===================================================== */
 input,
 select,
 button {
+  font: inherit; /* ใช้ฟอนต์เดียวกับหน้าเว็บ */
+  font-size: 0.95rem;
   padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+input,
+select {
+  background: var(--bg);
+  color: var(--text);
 }
 
 input {
-  flex: 1;
-  min-width: 180px;
+  flex: 1 1 160px; /* ยืดหดตามพื้นที่ แต่ไม่แคบกว่า 160px */
+  min-width: 0;
 }
 
-select {
-  background: white;
+input::placeholder {
+  color: #6d6d72; /* สีข้อความตัวอย่างในช่องกรอก */
 }
 
-/* ปุ่ม */
+/* ช่องที่แก้ไขไม่ได้ (อีเมลและ Role ตอนเข้าสู่ระบบแล้ว) */
+input[readonly] {
+  color: var(--muted);
+  cursor: default;
+}
+
+/* กรอบสีแดงตอนกด Tab หรือคลิกที่ช่อง (ช่วยให้เห็นว่าอยู่ช่องไหน) */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ปุ่มหลัก: พื้นแดง ตัวอักษรขาว */
 button {
-  background: #222;
-  color: white;
-  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+  font-weight: 600;
   cursor: pointer;
 }
 
 button:hover {
-  opacity: 0.85;
+  filter: brightness(1.08); /* สว่างขึ้นเล็กน้อยตอนเมาส์ชี้ */
 }
 
+/* ปุ่มรอง (ยกเลิก, ก่อนหน้า/ถัดไป, แก้ไข): พื้นโปร่ง มีแค่เส้นขอบ */
+button.secondary,
+.edit-button {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+button.secondary:hover,
+.edit-button:hover {
+  border-color: var(--accent);
+  filter: none;
+}
+
+/* ปุ่มลบ: ตัวอักษรสีแดง */
+.delete-button {
+  background: transparent;
+  color: var(--danger);
+  border-color: #5a2a2a;
+}
+
+.delete-button:hover {
+  background: #2a1414;
+  filter: none;
+}
+
+/* ปุ่มที่กดไม่ได้ (เช่น "ก่อนหน้า" ตอนอยู่หน้าแรก) */
 button:disabled {
-  background: #aaa;
+  opacity: 0.4;
   cursor: not-allowed;
+  filter: none;
 }
 
-button.secondary {
-  background: #777;
+/* =====================================================
+   ข้อความสถานะต่างๆ
+   ===================================================== */
+#loginMessage,
+#registerMessage,
+#movieFormMessage {
+  margin: 12px 0 0;
+  min-height: 1.5em; /* กันหน้าเว็บกระตุกตอนข้อความโผล่ขึ้นมา */
+  color: var(--muted);
 }
 
-/* แถบค้นหา */
+#loading {
+  text-align: center;
+  color: var(--muted);
+}
+
+#errorMessage {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* =====================================================
+   แถบค้นหา
+   ===================================================== */
 .toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .toolbar input {
-  flex: 1;
+  flex: 1 1 260px; /* ช่องค้นหากว้างที่สุดในแถบ */
 }
 
-/* รายการหนัง */
+/* =====================================================
+   รายการหนัง (การ์ดโปสเตอร์)
+   ===================================================== */
+
+/* จัดตารางอัตโนมัติ: การ์ดกว้างอย่างน้อย 220px และเพิ่มจำนวนคอลัมน์ตามขนาดหน้าจอ */
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
 }
 
-/* การ์ดหนังแต่ละเรื่อง */
 .movie-card {
-  background: white;
-  padding: 18px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden; /* ตัดโปสเตอร์ให้มนตามมุมการ์ด */
 }
 
-.movie-card h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
+/* ส่วนโปสเตอร์ด้านบนการ์ด สีเทาเข้มเหมือนกันทุกเรื่อง (ตัวแปร --h จาก app.js ไม่ได้ใช้แล้ว) */
+.poster {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* ดันตัวเลขปีไปอยู่ล่างซ้าย */
+  aspect-ratio: 4 / 3;
+  padding: 14px 22px;
+  background: linear-gradient(160deg, #343437, #151516);
 }
 
-.movie-card p {
-  margin: 6px 0;
-  color: #555;
+/* รอยรูขอบฟิล์มซ้ายและขวา (ทำจากลายเส้นซ้ำๆ) */
+.poster::before,
+.poster::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: repeating-linear-gradient(to bottom, transparent 0 8px, rgba(0, 0, 0, 0.4) 8px 16px);
 }
 
+.poster::before {
+  left: 5px;
+}
+
+.poster::after {
+  right: 5px;
+}
+
+/* ชื่อหนัง: ตัวอักษรใหญ่และเด่นที่สุดบนโปสเตอร์ (ถ้ายาวเกิน 3 บรรทัดจะตัดด้วย ...) */
+.poster-title {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ปีที่ฉายและ ID: ตัวเล็ก อยู่ใต้ชื่อหนัง */
+.poster-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6); /* ปีที่ฉาย: สีจาง */
+}
+
+/* ID: ป้ายสีแดง ตัวอักษรขาว เด่นกว่าปีที่ฉาย (span ตัวที่ 2 ใน .poster-meta) */
+.poster-meta span:last-child {
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 6px;
+}
+
+/* ส่วนข้อมูลใต้โปสเตอร์ (ผู้กำกับ, ปุ่ม) */
+.movie-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px;
+}
+
+.movie-info p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ปุ่มแก้ไข/ลบ อยู่ล่างสุดของการ์ดเสมอ ทำให้ทุกการ์ดปุ่มอยู่ระดับเดียวกัน */
 .movie-actions {
   display: flex;
   gap: 8px;
-  margin-top: 15px;
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .movie-actions button {
-  flex: 1;
+  flex: 1; /* ปุ่มสองปุ่มกว้างเท่ากัน */
 }
 
-.edit-button {
-  background: #555;
+/* ข้อความ "ไม่พบข้อมูลภาพยนตร์" ให้กว้างเต็มแถว */
+.movie-grid > .card {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
 }
 
-.delete-button {
-  background: #b00020;
-}
-
-/* Pagination */
+/* =====================================================
+   ปุ่มเปลี่ยนหน้า
+   ===================================================== */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
-  margin: 25px 0;
+  gap: 16px;
+  margin: 32px 0 12px;
 }
 
 #pageInfo {
-  font-weight: bold;
-}
-
-/* ข้อความสถานะ */
-#loading {
+  font-weight: 600;
+  min-width: 90px;
   text-align: center;
-  font-weight: bold;
 }
 
-#errorMessage {
-  color: #b00020;
-  font-weight: bold;
-}
+/* =====================================================
+   รองรับหน้าจอเล็ก
+   ===================================================== */
 
-#loginMessage,
-#movieFormMessage {
-  font-weight: bold;
-}
-
-/* รองรับหน้าจอขนาดเล็ก */
-@media (max-width: 900px) {
-  .movie-grid {
-    grid-template-columns: repeat(2, 1fr);
+/* แท็บเล็ต: ฟอร์ม Login กับฟอร์มหนังเรียงต่อลงมา */
+@media (max-width: 800px) {
+  .panels {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 600px) {
+/* มือถือ: การ์ดหนังแถวละใบ และปุ่มกว้างเต็มแถว */
+@media (max-width: 520px) {
+  .container {
+    padding: 0 14px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
   .movie-grid {
     grid-template-columns: 1fr;
   }
 
-  .container {
-    padding: 0 10px;
-  }
-
-  form,
-  .toolbar {
-    flex-direction: column;
-  }
-
-  input,
-  select,
-  button {
+  form button,
+  .toolbar > * {
     width: 100%;
   }
 }

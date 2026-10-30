@@ -3,78 +3,105 @@
   <head>
     <meta charset="UTF-8" />
 
-    <!-- ทำให้หน้าเว็บรองรับหน้าจอมือถือ -->
+    <!-- ทำให้หน้าเว็บแสดงผลพอดีกับหน้าจอมือถือ -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Movie API</title>
 
+    <!-- โหลดฟอนต์จาก Google Fonts: Prompt (หัวข้อ) และ Sarabun (เนื้อหา) ทั้งคู่รองรับภาษาไทย -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;700&family=Sarabun:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- ไฟล์จัดหน้าตาทั้งหมด -->
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
+    <!-- ส่วนหัวของเว็บ -->
     <header class="header">
-      <h1>Movie API 🎬</h1>
-      <p>ระบบจัดการข้อมูลภาพยนตร์</p>
+      <div class="header-inner">
+        <h1>Movie API 🎬</h1>
+        <p>ระบบจัดการข้อมูลภาพยนตร์</p>
+      </div>
     </header>
 
     <main class="container">
-      <!-- =================== -->
-      <!-- Login -->
-      <!-- =================== -->
+      <!-- แถวบน: ฟอร์ม Login (ซ้าย) กับฟอร์มสมัครสมาชิก (ขวา) -->
+      <div class="panels">
+        <!-- ===== Login / Logout ===== -->
+        <section class="card">
+          <h2>เข้าสู่ระบบ</h2>
 
-      <section class="card">
-        <h2>เข้าสู่ระบบ</h2>
+          <!-- novalidate = ปิดข้อความเตือนของ Browser เพราะ app.js แสดงข้อความภาษาไทยเอง -->
+          <form id="loginForm" novalidate>
+            <input id="email" type="email" placeholder="Email" aria-label="Email" autocomplete="username" />
+            <input id="password" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" />
 
-        <!-- ปิด Browser Validation เพื่อให้ JavaScript แสดงข้อความภาษาไทยเอง -->
-        <form id="loginForm" novalidate>
-          <input id="email" type="email" placeholder="Email" />
+            <!-- ตอนเข้าสู่ระบบแล้ว ช่องนี้จะโผล่มาแทนช่องรหัสผ่านเพื่อแสดง Role (ซ่อนอยู่ตอนแรก) -->
+            <input id="roleDisplay" type="text" aria-label="สิทธิ์ผู้ใช้" readonly hidden />
 
-          <input id="password" type="password" placeholder="Password" />
+            <!-- app.js เปลี่ยนข้อความปุ่มนี้เป็น "ออกจากระบบ" ตอนเข้าสู่ระบบแล้ว -->
+            <button type="submit" id="loginButton">เข้าสู่ระบบ</button>
+          </form>
 
-          <button type="submit">Login</button>
-        </form>
+          <!-- ข้อความสถานะ: "กรุณาเข้าสู่ระบบ" หรือ "เข้าสู่ระบบแล้ว" -->
+          <p id="loginMessage" role="status">กรุณาเข้าสู่ระบบ</p>
+        </section>
 
-        <p id="loginMessage"></p>
-      </section>
+        <!-- ===== สมัครสมาชิก (สร้างบัญชี role user) ===== -->
+        <section class="card">
+          <h2>สมัครสมาชิก</h2>
 
-      <!-- =================== -->
-      <!-- Movie Form -->
-      <!-- =================== -->
+          <form id="registerForm" novalidate>
+            <input id="registerEmail" type="email" placeholder="Email" aria-label="Email สำหรับสมัครสมาชิก" autocomplete="off" />
+            <input
+              id="registerPassword"
+              type="password"
+              placeholder="Password (อย่างน้อย 6 ตัวอักษร)"
+              aria-label="Password สำหรับสมัครสมาชิก"
+              autocomplete="new-password"
+            />
+            <button type="submit" class="secondary">สมัครสมาชิก</button>
+          </form>
 
-      <section class="card">
+          <p id="registerMessage" role="status"></p>
+        </section>
+      </div>
+
+      <!-- ===== ฟอร์มเพิ่ม / แก้ไขภาพยนตร์ ===== -->
+      <section class="card movie-form-card">
+        <!-- หัวข้อนี้ app.js เปลี่ยนเป็น "แก้ไขภาพยนตร์ ID ..." ตอนกดแก้ไข -->
         <h2 id="formTitle">เพิ่มภาพยนตร์</h2>
 
-        <!-- ปิด Browser Validation เพื่อให้ JavaScript แสดงข้อความภาษาไทยเอง -->
         <form id="movieForm" novalidate>
-          <input id="movieTitle" type="text" placeholder="ชื่อภาพยนตร์" />
-
-          <input id="movieDirector" type="text" placeholder="ผู้กำกับ" />
-
-          <input id="movieYear" type="number" placeholder="ปีที่ฉาย" min="1" />
-
+          <input id="movieTitle" type="text" placeholder="ชื่อภาพยนตร์" aria-label="ชื่อภาพยนตร์" />
+          <input id="movieDirector" type="text" placeholder="ผู้กำกับ" aria-label="ผู้กำกับ" />
+          <input id="movieYear" type="number" placeholder="ปีที่ฉาย" aria-label="ปีที่ฉาย" min="1" />
           <button type="submit">บันทึกภาพยนตร์</button>
 
+          <!-- ซ่อนอยู่ตลอด จะโผล่เฉพาะตอนกำลังแก้ไขหนัง -->
           <button type="button" id="cancelEditButton" class="secondary" hidden>ยกเลิกการแก้ไข</button>
         </form>
 
-        <p id="movieFormMessage"></p>
+        <!-- ข้อความแจ้งผล เช่น "เพิ่มภาพยนตร์สำเร็จ" -->
+        <p id="movieFormMessage" role="status"></p>
       </section>
 
-      <!-- =================== -->
-      <!-- Search / Sort -->
-      <!-- =================== -->
-
+      <!-- ===== แถบค้นหาและเรียงลำดับ ===== -->
       <section class="toolbar">
-        <input id="searchInput" type="text" placeholder="ค้นหาชื่อหนังหรือผู้กำกับ..." />
+        <input id="searchInput" type="text" placeholder="ค้นหาชื่อหนังหรือผู้กำกับ..." aria-label="ค้นหา" />
 
-        <select id="sortSelect">
+        <!-- เลือกว่าจะเรียงตามอะไร (ค่า value ต้องตรงกับที่ Backend รองรับ) -->
+        <select id="sortSelect" aria-label="เรียงตาม">
           <option value="id">เรียงตาม ID</option>
           <option value="title">ชื่อภาพยนตร์</option>
           <option value="director">ชื่อผู้กำกับ</option>
           <option value="release_year">ปีที่ฉายภาพยนตร์</option>
         </select>
 
-        <select id="orderSelect">
+        <!-- เรียงจากน้อยไปมาก หรือมากไปน้อย -->
+        <select id="orderSelect" aria-label="ลำดับ">
           <option value="asc">น้อย → มาก / A → Z</option>
           <option value="desc">มาก → น้อย / Z → A</option>
         </select>
@@ -82,39 +109,26 @@
         <button id="searchButton">ค้นหา</button>
       </section>
 
-      <!-- =================== -->
-      <!-- Loading -->
-      <!-- =================== -->
-
+      <!-- ข้อความ "กำลังโหลด" (ซ่อนไว้ แสดงเฉพาะตอนรอข้อมูล) -->
       <p id="loading" hidden>กำลังโหลดข้อมูล...</p>
 
-      <!-- =================== -->
-      <!-- Error -->
-      <!-- =================== -->
+      <!-- ข้อความ Error สีแดง (ว่างไว้ถ้าไม่มีปัญหา) -->
+      <p id="errorMessage" role="alert"></p>
 
-      <p id="errorMessage"></p>
-
-      <!-- =================== -->
-      <!-- Movie List -->
-      <!-- =================== -->
-
+      <!-- ===== รายการหนัง: app.js สร้างการ์ดโปสเตอร์ใส่ใน div นี้ ===== -->
       <section>
         <div id="movieList" class="movie-grid"></div>
       </section>
 
-      <!-- =================== -->
-      <!-- Pagination -->
-      <!-- =================== -->
-
+      <!-- ===== ปุ่มเปลี่ยนหน้า ===== -->
       <div class="pagination">
-        <button id="previousButton">← ก่อนหน้า</button>
-
+        <button id="previousButton" class="secondary">← ก่อนหน้า</button>
         <span id="pageInfo">หน้า 1</span>
-
-        <button id="nextButton">ถัดไป →</button>
+        <button id="nextButton" class="secondary">ถัดไป →</button>
       </div>
     </main>
 
+    <!-- โหลด app.js ท้ายสุด เพื่อให้ element ด้านบนถูกสร้างเสร็จก่อน -->
     <script src="app.js"></script>
   </body>
 </html>

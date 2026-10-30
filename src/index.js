@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
-const pool = require("./db");
+const pool = require("../db");
 
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
@@ -37,7 +37,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // เปิด Frontend จากโฟลเดอร์ frontend ให้สามารถเข้าถึงได้ผ่าน URL
-app.use(express.static(path.join(__dirname, "frontend")));
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // ตรวจสอบการทำงานของ API
 app.get("/", (req, res) => {

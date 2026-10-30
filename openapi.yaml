@@ -858,9 +858,6 @@ components:
           type: string
           description: JWT Token
 
-        data:
-          $ref: "#/components/schemas/AuthUser"
-
     # -------------------------------------------------------
     # Error
     # -------------------------------------------------------

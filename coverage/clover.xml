@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1793294360559" clover="3.2.0">
-  <project timestamp="1793294360560" name="All files">
-    <metrics statements="239" coveredstatements="195" conditionals="115" coveredconditionals="82" methods="31" coveredmethods="26" elements="385" coveredelements="303" complexity="0" loc="239" ncloc="239" packages="3" files="7" classes="7"/>
+<coverage generated="1793319931501" clover="3.2.0">
+  <project timestamp="1793319931501" name="All files">
+    <metrics statements="239" coveredstatements="195" conditionals="115" coveredconditionals="82" methods="31" coveredmethods="26" elements="385" coveredelements="303" complexity="0" loc="239" ncloc="239" packages="4" files="7" classes="7"/>
     <package name="project-phase3">
-      <metrics statements="181" coveredstatements="139" conditionals="83" coveredconditionals="56" methods="22" coveredmethods="17"/>
-      <file name="auth-helpers.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\auth-helpers.js">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="db.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\db.js">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="project-phase3.src">
+      <metrics statements="178" coveredstatements="136" conditionals="83" coveredconditionals="56" methods="22" coveredmethods="17"/>
+      <file name="auth-helpers.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\auth-helpers.js">
         <metrics statements="7" coveredstatements="7" conditionals="2" coveredconditionals="1" methods="3" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
@@ -14,13 +23,7 @@
         <line num="20" count="3" type="stmt"/>
         <line num="38" count="1" type="stmt"/>
       </file>
-      <file name="db.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\db.js">
-        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="13" count="1" type="stmt"/>
-      </file>
-      <file name="index.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\index.js">
+      <file name="index.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\index.js">
         <metrics statements="171" coveredstatements="129" conditionals="81" coveredconditionals="55" methods="19" coveredmethods="14"/>
         <line num="1" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -195,9 +198,9 @@
         <line num="605" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="project-phase3.middleware">
+    <package name="project-phase3.src.middleware">
       <metrics statements="34" coveredstatements="33" conditionals="18" coveredconditionals="14" methods="6" coveredmethods="6"/>
-      <file name="auth.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\middleware\auth.js">
+      <file name="auth.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\middleware\auth.js">
         <metrics statements="16" coveredstatements="15" conditionals="8" coveredconditionals="7" methods="3" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
         <line num="7" count="15" type="stmt"/>
@@ -216,7 +219,7 @@
         <line num="66" count="8" type="stmt"/>
         <line num="71" count="1" type="stmt"/>
       </file>
-      <file name="query-parser.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\middleware\query-parser.js">
+      <file name="query-parser.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\middleware\query-parser.js">
         <metrics statements="14" coveredstatements="14" conditionals="10" coveredconditionals="7" methods="3" coveredmethods="3"/>
         <line num="3" count="1" type="stmt"/>
         <line num="9" count="1" type="cond" truecount="2" falsecount="0"/>
@@ -233,7 +236,7 @@
         <line num="59" count="1" type="stmt"/>
         <line num="62" count="1" type="stmt"/>
       </file>
-      <file name="rateLimiter.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\middleware\rateLimiter.js">
+      <file name="rateLimiter.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\middleware\rateLimiter.js">
         <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -241,9 +244,9 @@
         <line num="52" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="project-phase3.services">
+    <package name="project-phase3.src.services">
       <metrics statements="24" coveredstatements="23" conditionals="14" coveredconditionals="12" methods="3" coveredmethods="3"/>
-      <file name="external-api.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\services\external-api.js">
+      <file name="external-api.js" path="C:\WD Black C-Drive\67160402 Class\Huto Movies API Project\project-phase3\src\services\external-api.js">
         <metrics statements="24" coveredstatements="23" conditionals="14" coveredconditionals="12" methods="3" coveredmethods="3"/>
         <line num="1" count="2" type="stmt"/>
         <line num="3" count="4" type="stmt"/>

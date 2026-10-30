@@ -3,7 +3,7 @@
 jest.mock("axios");
 
 const axios = require("axios");
-const { searchExternalMovie } = require("../services/external-api");
+const { searchExternalMovie } = require("../src/services/external-api");
 
 describe("External Movie API Tests", () => {
   beforeEach(() => {

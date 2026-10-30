@@ -1,0 +1,87 @@
+# วิธีใช้งาน: git clone แล้วสร้างไฟล์ .env (คัดลอกจาก .env.example) จากนั้นรัน
+#   docker-compose up -d
+# เปิดเว็บที่ http://localhost:3000 และเอกสาร API ที่ http://localhost:3000/api-docs
+#
+# รีเซ็ตฐานข้อมูลกลับเป็นข้อมูลตั้งต้น (schema.sql + seed.sql):
+#   docker-compose down -v
+#   docker-compose up -d
+
+services:
+  # ===== ฐานข้อมูล MySQL =====
+  mysql:
+    image: mysql:8.0
+    container_name: movie-api-mysql
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-1234}
+      MYSQL_DATABASE: ${DB_NAME:-movie_api}
+
+    # เครื่อง Host ใช้พอร์ต 3307 เพื่อไม่ชนกับ MySQL ที่อาจลงไว้ในเครื่องอยู่แล้ว
+    # ส่วนภายใน Docker ใช้ 3306 ตามปกติ
+    ports:
+      - "3307:3306"
+
+    volumes:
+      # เก็บข้อมูลฐานข้อมูลไว้ถาวร (ไม่หายเมื่อปิด container)
+      - movie_api_mysql_data:/var/lib/mysql
+      # สองไฟล์นี้จะรันอัตโนมัติ "เฉพาะครั้งแรก" ที่สร้างฐานข้อมูลใหม่ (เรียงตามเลขหน้าชื่อไฟล์)
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+
+    # ตรวจว่า MySQL พร้อมใช้งานแล้วหรือยัง ก่อนให้ API เริ่มทำงาน
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  # ===== API + Frontend (Node.js) =====
+  api:
+    image: node:20-alpine
+    container_name: movie-api
+    restart: unless-stopped
+
+    working_dir: /app
+
+    # รอให้ MySQL พร้อม (ผ่าน healthcheck) ก่อนค่อยเริ่ม
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      # เอาโฟลเดอร์โปรเจ็คทั้งหมด (รวม src/ และ frontend/) เข้าไปใน container
+      - .:/app
+      # แยก node_modules ไว้ใน volume ของ Docker ไม่ใช้ของเครื่องเรา
+      - movie_api_node_modules:/app/node_modules
+
+    environment:
+      PORT: 3000
+      NODE_ENV: ${NODE_ENV:-development}
+
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:3001}
+
+      # ใน Docker ต้องใช้ชื่อ Service ของ MySQL (ไม่ใช่ localhost)
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD:-1234}
+      DB_NAME: ${DB_NAME:-movie_api}
+
+      OMDB_API_KEY: ${OMDB_API_KEY:-}
+      OMDB_FORCE_FAILURE: ${OMDB_FORCE_FAILURE:-false}
+      OMDB_FORCE_TIMEOUT: ${OMDB_FORCE_TIMEOUT:-false}
+
+      JWT_SECRET: ${JWT_SECRET:-movie-api-secret-change-this}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
+
+    # ติดตั้งแพ็กเกจ แล้วเริ่มเซิร์ฟเวอร์ด้วย script "start" ใน package.json
+    # (หลังย้ายไฟล์ไป src/ ต้องแก้ start เป็น node src/index.js)
+    command: sh -c "npm install && npm start"
+
+volumes:
+  movie_api_mysql_data:
+  movie_api_node_modules:
