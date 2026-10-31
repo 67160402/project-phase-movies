@@ -35,11 +35,11 @@ Time:        3.299 s
 Ran all test suites.
 ```
 
-| Test Suite | จำนวน Test | ทดสอบอะไร |
-| --- | ---: | --- |
-| `tests/api.test.js` | 26 | ทดสอบทุก Endpoint ผ่าน HTTP กับฐานข้อมูลจริง: Movies CRUD, ค้นหา/Pagination/Sort, Genres, Movie ↔ Genre, External endpoint, 404 และ Error Handler (500) |
-| `tests/external-api.test.js` | 4 | Logic ภายใน `external-api.js`: สำเร็จ, ไม่พบภาพยนตร์, Retry + Fallback เมื่อล้มเหลว, Retry + Fallback เมื่อ Timeout |
-| **รวม** | **30** | ผ่านทั้งหมด ไม่มี Test ที่ล้มเหลว |
+| Test Suite                   | จำนวน Test | ทดสอบอะไร                                                                                                                                               |
+| ---------------------------- | ---------: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/api.test.js`          |         26 | ทดสอบทุก Endpoint ผ่าน HTTP กับฐานข้อมูลจริง: Movies CRUD, ค้นหา/Pagination/Sort, Genres, Movie ↔ Genre, External endpoint, 404 และ Error Handler (500) |
+| `tests/external-api.test.js` |          4 | Logic ภายใน `external-api.js`: สำเร็จ, ไม่พบภาพยนตร์, Retry + Fallback เมื่อล้มเหลว, Retry + Fallback เมื่อ Timeout                                     |
+| **รวม**                      |     **30** | ผ่านทั้งหมด ไม่มี Test ที่ล้มเหลว                                                                                                                       |
 
 ---
 
@@ -51,7 +51,7 @@ File                                 | % Stmts | % Branch | % Funcs | % Lines | 
 -------------------------------------|---------|----------|---------|---------|-------------------------------------------------
 All files                            |   92.09 |    87.95 |   95.83 |   92.39 |
  project-phase-movies                |     100 |       50 |     100 |     100 |
-  db.js                              |     100 |       50 |     100 |     100 | 5
+  db.js                              |     100 |       50 |     100 |     100 |
  project-phase-movies/src            |      90 |    87.71 |   94.44 |   90.55 |
   index.js                           |      90 |    87.71 |   94.44 |   90.55 | 114,139,169,186,203,231,258,311-312,335,352-353
  project-phase-movies/src/middleware |     100 |      100 |     100 |     100 |
@@ -62,12 +62,12 @@ All files                            |   92.09 |    87.95 |   95.83 |   92.39 |
 -------------------------------------|---------|----------|---------|---------|-------------------------------------------------
 ```
 
-| ตัวชี้วัด | Coverage |
-| --- | ---: |
+| ตัวชี้วัด      |   Coverage |
+| -------------- | ---------: |
 | **Statements** | **92.09%** |
-| **Branches** | **87.95%** |
-| **Functions** | **95.83%** |
-| **Lines** | **92.39%** |
+| **Branches**   | **87.95%** |
+| **Functions**  | **95.83%** |
+| **Lines**      | **92.39%** |
 
 ---
 
@@ -108,14 +108,14 @@ All files                            |   92.09 |    87.95 |   95.83 |   92.39 |
 
 ## 5. จุดที่ยังไม่มี Test ครอบคลุม
 
-| ไฟล์:บรรทัด | โค้ด | เหตุผลที่ยังไม่ครอบคลุม |
-| --- | --- | --- |
+| ไฟล์:บรรทัด                                  | โค้ด                                                                                             | เหตุผลที่ยังไม่ครอบคลุม                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `index.js:114, 139, 169, 186, 203, 258, 335` | `next(err)` ใน `catch` ของ GET/POST/PUT/DELETE movies, GET genres, GET movie genres และ External | Test จำลองฐานข้อมูลล่มเฉพาะ `GET /movies` (ครอบคลุม Error Handler กลางแล้ว) แต่ยังไม่ได้จำลองแยกทุก Endpoint |
-| `index.js:231` | `next(err)` ใน POST genres กรณี Error ที่ไม่ใช่ชื่อซ้ำ | ต้องจำลอง Database Error ชนิดอื่นที่ไม่ใช่ `ER_DUP_ENTRY` |
-| `index.js:311-312` | `rollback()` ใน PUT movie genres | ต้องทำให้ Query ภายใน Transaction ล้มกลางทาง ซึ่งยังไม่มี Test |
-| `index.js:352-353` | `app.listen(...)` | ทำงานเฉพาะตอนรัน `node src/index.js` โดยตรง ตอน Test ใช้ Supertest จึงไม่ถูกเรียก (ตั้งใจ) |
-| `external-api.js:76` | `return fallback` หลัง loop | ไม่มีทางไปถึงได้จริง เพราะรอบสุดท้ายของ loop `return` ก่อนเสมอ เป็นบรรทัดกันพลาด |
-| `db.js:5` | `process.env.DB_PORT \|\| 3306` | Test ส่ง `DB_PORT` ทุกครั้ง จึงไม่เข้า Branch ค่าเริ่มต้น |
+| `index.js:231`                               | `next(err)` ใน POST genres กรณี Error ที่ไม่ใช่ชื่อซ้ำ                                           | ต้องจำลอง Database Error ชนิดอื่นที่ไม่ใช่ `ER_DUP_ENTRY`                                                    |
+| `index.js:311-312`                           | `rollback()` ใน PUT movie genres                                                                 | ต้องทำให้ Query ภายใน Transaction ล้มกลางทาง ซึ่งยังไม่มี Test                                               |
+| `index.js:352-353`                           | `app.listen(...)`                                                                                | ทำงานเฉพาะตอนรัน `node src/index.js` โดยตรง ตอน Test ใช้ Supertest จึงไม่ถูกเรียก (ตั้งใจ)                   |
+| `external-api.js:76`                         | `return fallback` หลัง loop                                                                      | ไม่มีทางไปถึงได้จริง เพราะรอบสุดท้ายของ loop `return` ก่อนเสมอ เป็นบรรทัดกันพลาด                             |
+| `db.js:5`                                    | `process.env.DB_PORT \|\| 3306`                                                                  | Test ส่ง `DB_PORT` ทุกครั้ง จึงไม่เข้า Branch ค่าเริ่มต้น                                                    |
 
 ส่วนที่เสี่ยงที่สุดในรายการนี้คือ **Rollback ของ Transaction** (`index.js:311-312`) ถ้าจะเพิ่ม Test ควรเริ่มจากจุดนี้
 
