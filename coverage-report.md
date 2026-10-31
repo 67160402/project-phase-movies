@@ -1,26 +1,26 @@
-# รายงาน Test Coverage Baseline — Movies API (Phase 3)
+# Test Coverage Report Baseline — Movies API
 
 ## 1. วิธีรัน
 
-ติดตั้ง dependencies ของโปรเจกต์ก่อน:
+ติดตั้ง dependencies ของโปรเจกต์ก่อน
 
 ```bash
 npm install
 ```
 
-รัน Test ทั้งหมด:
+รัน Test ทั้งหมด
 
 ```bash
 npm test
 ```
 
-รัน Test พร้อมตรวจสอบ Test Coverage:
+รัน Test พร้อมตรวจสอบ Test Coverage
 
 ```bash
 npm test -- --coverage
 ```
 
-รายงาน Coverage แบบ HTML จะถูกสร้างไว้ในโฟลเดอร์:
+รายงาน Coverage แบบ HTML จะถูกสร้างไว้ในโฟลเดอร์
 
 ```text
 coverage/
@@ -80,7 +80,7 @@ All files                      |   81.96 |     71.3 |   83.87 |   81.58 |
   db.js                        |     100 |      100 |     100 |     100 |
  project-phase3/src            |   76.66 |    67.46 |   77.27 |    76.4 |
   auth-helpers.js              |     100 |       50 |     100 |     100 | 32
-  index.js                     |   75.72 |     67.9 |   73.68 |   75.43 | ...32,164,192-193,238,265,283,308,326,337,363,374,386,400,411,431-440,450,472,499-501,540-544,554-570,576,586-588,599-600
+  index.js                     |   75.72 |     67.9 |   73.68 |   75.43 | ...32,164,...,586-588,599-600
  project-phase3/src/middleware |   97.05 |    77.77 |     100 |   97.05 |
   auth.js                      |   93.75 |     87.5 |     100 |   93.75 | 46
   query-parser.js              |     100 |       70 |     100 |     100 | 32-53
