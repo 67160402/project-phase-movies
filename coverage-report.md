@@ -2,284 +2,138 @@
 
 ## 1. วิธีรัน
 
-ติดตั้ง dependencies ของโปรเจกต์ก่อน
+Test ของ API ต้องเชื่อมต่อ MySQL จริง จึงต้องเปิดฐานข้อมูลก่อน (ใช้ Docker ได้)
 
 ```bash
 npm install
+docker compose up -d --build
 ```
 
-รัน Test ทั้งหมด
+รัน Test พร้อม Coverage (MySQL ใน Docker เปิดพอร์ต 3307 ที่เครื่อง Host)
 
 ```bash
-npm test
+DB_HOST=127.0.0.1 DB_PORT=3307 DB_USER=root DB_PASSWORD=1234 DB_NAME=movie_api npx jest --coverage
 ```
 
-รัน Test พร้อมตรวจสอบ Test Coverage
-
-```bash
-npm test -- --coverage
-```
-
-รายงาน Coverage แบบ HTML จะถูกสร้างไว้ในโฟลเดอร์
-
-```text
-coverage/
-└── lcov-report/
-    └── index.html
-```
-
-สามารถเปิดไฟล์ `coverage/lcov-report/index.html` เพื่อดูรายละเอียด Coverage ของแต่ละไฟล์ได้
+รายงานแบบ HTML อยู่ที่ `coverage/lcov-report/index.html`
 
 ### เครื่องมือที่ใช้
 
 - **Jest** สำหรับ Unit Test และ API Test
-- **Supertest** สำหรับทดสอบ HTTP API
-- Node.js เป็น Test Environment
+- **Supertest** สำหรับยิง HTTP Request เข้า Express app โดยไม่ต้องเปิด Port
+- **jest.mock** สำหรับจำลอง `axios` และ External API Service เพื่อไม่ให้ Test ยิง OMDb จริง
 
 ---
 
 ## 2. ผลการรัน Test
 
-ผลการรันล่าสุดหลังจากปรับโครงสร้างโปรเจกต์ให้ Backend อยู่ภายใน `src/`:
-
 ```text
 Test Suites: 2 passed, 2 total
-Tests:       32 passed, 32 total
+Tests:       30 passed, 30 total
 Snapshots:   0 total
-Time:        5.248 s
+Time:        3.299 s
 Ran all test suites.
 ```
 
-### Test Suites
-
-| Test Suite                   | จำนวน Test | ทดสอบอะไร                                                                                                                           |
-| ---------------------------- | ---------: | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `tests/api.test.js`          |         28 | Authentication, JWT, Movie API, RBAC, Genre API และความสัมพันธ์ระหว่าง Movie กับ Genre                                              |
-| `tests/external-api.test.js` |          4 | External Movie API ได้แก่ การเรียก API สำเร็จ, ไม่พบภาพยนตร์, Retry/Fallback เมื่อ API ล้มเหลว และ Retry/Fallback เมื่อเกิด Timeout |
-| **รวม**                      |     **32** | **ทดสอบ API หลักและ External API**                                                                                                  |
-
-ผลการทดสอบ:
-
-- Test Suites ผ่านทั้งหมด **2/2**
-- Tests ผ่านทั้งหมด **32/32**
-- Tests ที่ไม่ผ่าน **0**
-- Snapshots **0**
+| Test Suite | จำนวน Test | ทดสอบอะไร |
+| --- | ---: | --- |
+| `tests/api.test.js` | 26 | ทดสอบทุก Endpoint ผ่าน HTTP กับฐานข้อมูลจริง: Movies CRUD, ค้นหา/Pagination/Sort, Genres, Movie ↔ Genre, External endpoint, 404 และ Error Handler (500) |
+| `tests/external-api.test.js` | 4 | Logic ภายใน `external-api.js`: สำเร็จ, ไม่พบภาพยนตร์, Retry + Fallback เมื่อล้มเหลว, Retry + Fallback เมื่อ Timeout |
+| **รวม** | **30** | ผ่านทั้งหมด ไม่มี Test ที่ล้มเหลว |
 
 ---
 
 ## 3. ผล Test Coverage
 
-ผล Coverage จากการรันจริง:
-
 ```text
--------------------------------|---------|----------|---------|---------|-----------------------------------------------------------
-File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
--------------------------------|---------|----------|---------|---------|-----------------------------------------------------------
-All files                      |   81.96 |     71.3 |   83.87 |   81.58 |
- project-phase3                |     100 |      100 |     100 |     100 |
-  db.js                        |     100 |      100 |     100 |     100 |
- project-phase3/src            |   76.66 |    67.46 |   77.27 |    76.4 |
-  auth-helpers.js              |     100 |       50 |     100 |     100 | 32
-  index.js                     |   75.72 |     67.9 |   73.68 |   75.43 | ...32,164,...,586-588,599-600
- project-phase3/src/middleware |   97.05 |    77.77 |     100 |   97.05 |
-  auth.js                      |   93.75 |     87.5 |     100 |   93.75 | 46
-  query-parser.js              |     100 |       70 |     100 |     100 | 32-53
-  rateLimiter.js               |     100 |      100 |     100 |     100 |
- project-phase3/src/services   |   96.29 |    85.71 |     100 |    95.83 |
-  external-api.js              |   96.29 |    85.71 |     100 |    95.83 | 76
--------------------------------|---------|----------|---------|---------|-----------------------------------------------------------
+-------------------------------------|---------|----------|---------|---------|-------------------------------------------------
+File                                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------------------------|---------|----------|---------|---------|-------------------------------------------------
+All files                            |   92.09 |    87.95 |   95.83 |   92.39 |
+ project-phase-movies                |     100 |       50 |     100 |     100 |
+  db.js                              |     100 |       50 |     100 |     100 | 5
+ project-phase-movies/src            |      90 |    87.71 |   94.44 |   90.55 |
+  index.js                           |      90 |    87.71 |   94.44 |   90.55 | 114,139,169,186,203,231,258,311-312,335,352-353
+ project-phase-movies/src/middleware |     100 |      100 |     100 |     100 |
+  query-parser.js                    |     100 |      100 |     100 |     100 |
+  rateLimiter.js                     |     100 |      100 |     100 |     100 |
+ project-phase-movies/src/services   |   96.29 |    85.71 |     100 |   95.83 |
+  external-api.js                    |   96.29 |    85.71 |     100 |   95.83 | 76
+-------------------------------------|---------|----------|---------|---------|-------------------------------------------------
 ```
 
-### สรุปตัวชี้วัด
-
-| ตัวชี้วัด      |   Coverage |
-| -------------- | ---------: |
-| **Statements** | **81.96%** |
-| **Branches**   | **71.30%** |
-| **Functions**  | **83.87%** |
-| **Lines**      | **81.58%** |
-
-Coverage รวมของ Backend อยู่ที่:
-
-- **81.96% Statements**
-- **71.30% Branches**
-- **83.87% Functions**
-- **81.58% Lines**
+| ตัวชี้วัด | Coverage |
+| --- | ---: |
+| **Statements** | **92.09%** |
+| **Branches** | **87.95%** |
+| **Functions** | **95.83%** |
+| **Lines** | **92.39%** |
 
 ---
 
-## 4. Coverage แยกตามส่วนของระบบ
+## 4. สิ่งที่ Test ครอบคลุม
 
-### 4.1 Database
+### Movies (`/api/v1/movies`)
 
-| ไฟล์    | Statements | Branches | Functions | Lines |
-| ------- | ---------: | -------: | --------: | ----: |
-| `db.js` |       100% |     100% |      100% |  100% |
+- GET รายการพร้อม Pagination (`page`, `limit`) และ Sort (`sort`, `order`)
+- ค้นหาด้วย `q` จากชื่อหนังหรือผู้กำกับ
+- POST เพิ่มสำเร็จ (201) และข้อมูลไม่ครบ (400)
+- GET ตาม ID สำเร็จ (200) และไม่พบ (404)
+- PUT แก้ไขสำเร็จ (200), `release_year` เป็นข้อความ (400) และไม่พบ ID (404)
+- DELETE ลบสำเร็จ (200) และไม่พบ ID (404)
 
-`db.js` มี Coverage 100% จากการทำงานของระบบที่เรียกใช้ Database Connection Pool
+### Genres (`/api/v1/genres`)
 
----
+- GET รายการทั้งหมด
+- POST เพิ่มสำเร็จ (201), ชื่อซ้ำ (409) และไม่ระบุชื่อ (400)
 
-### 4.2 Core API
+### Movie ↔ Genre (`/api/v1/movies/:id/genres`)
 
-| ไฟล์                  | Statements | Branches | Functions |  Lines |
-| --------------------- | ---------: | -------: | --------: | -----: |
-| `src/index.js`        |     75.72% |   67.90% |    73.68% | 75.43% |
-| `src/auth-helpers.js` |       100% |      50% |      100% |   100% |
+- PUT กำหนดประเภทสำเร็จ และ GET ได้ประเภทที่กำหนดไว้
+- `genre_ids` ไม่ใช่ array (400), มี Genre ID ที่ไม่มีอยู่ (400)
+- ภาพยนตร์ไม่มีอยู่ ทั้ง GET และ PUT (404)
 
-`src/index.js` เป็นไฟล์หลักของ API และมีจำนวน Logic มากที่สุด จึงมีบางกรณีที่ยังไม่ได้ถูกเรียกใช้โดย Test เช่น บาง Error Handler, Validation และบางเส้นทางของ API
+### External API
 
----
+- Endpoint: ไม่ระบุ `title` (400), ส่งผลจาก Service กลับไปและตัดช่องว่างของ `title` (200)
+- Service: OMDb ตอบสำเร็จ, OMDb ไม่พบหนัง, Retry 3 ครั้งแล้ว Fallback เมื่อ Error และเมื่อ Timeout
 
-### 4.3 Middleware
+### ระบบทั่วไป
 
-| ไฟล์                             | Statements | Branches | Functions |  Lines |
-| -------------------------------- | ---------: | -------: | --------: | -----: |
-| `src/middleware/auth.js`         |     93.75% |   87.50% |      100% | 93.75% |
-| `src/middleware/query-parser.js` |       100% |   70.00% |      100% |   100% |
-| `src/middleware/rateLimiter.js`  |       100% |     100% |      100% |   100% |
-
-Middleware โดยรวมมี Coverage สูง เนื่องจากถูกเรียกใช้ในหลาย Test ของ API
-
----
-
-### 4.4 External API Service
-
-| ไฟล์                           | Statements | Branches | Functions |  Lines |
-| ------------------------------ | ---------: | -------: | --------: | -----: |
-| `src/services/external-api.js` |     96.29% |   85.71% |      100% | 95.83% |
-
-External API Service มี Test ครอบคลุมทั้ง:
-
-- การเรียก External API สำเร็จ
-- กรณีไม่พบภาพยนตร์
-- Retry เมื่อ External API ล้มเหลว
-- Fallback เมื่อ Retry ครบจำนวนที่กำหนด
-- Timeout และ Fallback
-
-จึงมี Coverage อยู่ในระดับสูง
+- `GET /` เปิดหน้า Frontend
+- Path ที่ไม่มีอยู่ (404 `ROUTE_NOT_FOUND`)
+- ฐานข้อมูลผิดพลาด (500 `INTERNAL_SERVER_ERROR`) และไม่ส่งข้อความ Error ภายในออกไปให้ Client
 
 ---
 
 ## 5. จุดที่ยังไม่มี Test ครอบคลุม
 
-จากรายงาน Coverage พบว่ายังมีบางบรรทัดที่ไม่ได้ถูกเรียกใช้ระหว่างการ Test โดยเฉพาะใน `src/index.js`
+| ไฟล์:บรรทัด | โค้ด | เหตุผลที่ยังไม่ครอบคลุม |
+| --- | --- | --- |
+| `index.js:114, 139, 169, 186, 203, 258, 335` | `next(err)` ใน `catch` ของ GET/POST/PUT/DELETE movies, GET genres, GET movie genres และ External | Test จำลองฐานข้อมูลล่มเฉพาะ `GET /movies` (ครอบคลุม Error Handler กลางแล้ว) แต่ยังไม่ได้จำลองแยกทุก Endpoint |
+| `index.js:231` | `next(err)` ใน POST genres กรณี Error ที่ไม่ใช่ชื่อซ้ำ | ต้องจำลอง Database Error ชนิดอื่นที่ไม่ใช่ `ER_DUP_ENTRY` |
+| `index.js:311-312` | `rollback()` ใน PUT movie genres | ต้องทำให้ Query ภายใน Transaction ล้มกลางทาง ซึ่งยังไม่มี Test |
+| `index.js:352-353` | `app.listen(...)` | ทำงานเฉพาะตอนรัน `node src/index.js` โดยตรง ตอน Test ใช้ Supertest จึงไม่ถูกเรียก (ตั้งใจ) |
+| `external-api.js:76` | `return fallback` หลัง loop | ไม่มีทางไปถึงได้จริง เพราะรอบสุดท้ายของ loop `return` ก่อนเสมอ เป็นบรรทัดกันพลาด |
+| `db.js:5` | `process.env.DB_PORT \|\| 3306` | Test ส่ง `DB_PORT` ทุกครั้ง จึงไม่เข้า Branch ค่าเริ่มต้น |
 
-ตัวอย่างส่วนที่ยังไม่ครอบคลุม ได้แก่:
-
-- บางกรณีของ Authentication
-- บางกรณีของ Movie API
-- บางกรณีของ Genre API
-- บางกรณีของ Movie-Genre Relationship
-- บางเส้นทางของ Error Handling
-- บาง Branch ของ Query Parser
-- บางกรณีของ Authentication Middleware
-- บางกรณีภายใน External API Service
-
-รายละเอียดบรรทัดที่ Coverage ยังไม่ครอบคลุมสามารถตรวจสอบเพิ่มเติมได้จากรายงาน HTML:
-
-```text
-coverage/lcov-report/index.html
-```
-
-โดยรายงาน Coverage แสดง Uncovered Lines ของแต่ละไฟล์ไว้โดยตรง
+ส่วนที่เสี่ยงที่สุดในรายการนี้คือ **Rollback ของ Transaction** (`index.js:311-312`) ถ้าจะเพิ่ม Test ควรเริ่มจากจุดนี้
 
 ---
 
-## 6. สิ่งที่ Test Coverage ครอบคลุม
+## 6. ข้อจำกัดของ Test Coverage
 
-Test Suite ปัจจุบันครอบคลุมฟังก์ชันหลักของระบบ ได้แก่:
+Coverage นี้วัดเฉพาะโค้ด Backend ที่ Jest รัน ส่วนที่ไม่ได้อยู่ในตัวเลขนี้ ได้แก่
 
-### Authentication
-
-- Register
-- Login
-- JWT Authentication
-- ตรวจสอบข้อมูลผู้ใช้
-- Authentication Middleware
-- Role-based Authorization
-
-### Movie API
-
-- GET Movies
-- GET Movie By ID
-- POST Movie
-- PUT Movie
-- DELETE Movie
-- Validation
-- Search
-- Pagination
-- Sorting
-
-### RBAC
-
-- กรณีไม่มี Token
-- กรณี User พยายามทำรายการที่ต้องใช้ Admin
-- กรณี Admin ทำรายการสำเร็จ
-
-### Genre API
-
-- GET Genres
-- POST Genre
-- Validation
-- ตรวจสอบข้อมูลซ้ำ
-
-### Movie-Genre Relationship
-
-- GET Genres ของภาพยนตร์
-- กำหนด Genre ให้ภาพยนตร์
-- Validation ของ `genre_ids`
-- ตรวจสอบ Movie ที่ไม่มีอยู่
-- ตรวจสอบ Genre ที่ไม่มีอยู่
-- Transaction ของการกำหนด Genre
-
-### External Movie API
-
-- External API Success
-- Movie Not Found
-- Retry
-- Timeout
-- Fallback
+- Frontend (`frontend/`) ทดสอบด้วยการใช้งานจริงผ่าน Browser
+- Rate Limiter ถูกโหลดและทำงานในทุก Request แต่ยังไม่มี Test ที่ยิงเกิน 100 ครั้งเพื่อตรวจ `429`
+- การเชื่อมต่อ OMDb จริง (ใน Test ใช้ Mock ทั้งหมด)
+- Postman Collection (`postman_collection.json`) รันแยกด้วย Postman CLI / Newman ผลล่าสุดผ่าน 30/30 assertions
 
 ---
 
-## 7. ข้อจำกัดของ Test Coverage
+## 7. สรุป
 
-Test Coverage นี้เป็นการทดสอบ Backend API ผ่าน Jest และ Supertest ดังนั้นไม่ได้หมายความว่าโค้ดทุกส่วนของระบบถูกทดสอบในทุกสถานการณ์จริง
+Baseline ของ Phase 3 คือ **30 Tests ผ่านทั้งหมด** และ Coverage รวม **92.09% Statements / 87.95% Branches / 95.83% Functions / 92.39% Lines**
 
-ส่วนที่ไม่ได้อยู่ใน Coverage ของ Jest โดยตรง ได้แก่:
-
-- Frontend ที่อยู่ใน `frontend/`
-- การทดสอบ UI ผ่าน Web Browser
-- การทดสอบการใช้งาน Swagger UI ด้วยตนเอง
-- การทดสอบ Postman/Newman
-- การทำงานของ MySQL Server จริงในทุกกรณี
-- การเชื่อมต่อ External API จริงในทุกสถานการณ์
-
-ส่วนเหล่านี้สามารถตรวจสอบเพิ่มเติมด้วยการทดสอบระบบจริงและ Newman ได้
-
----
-
-## 8. สรุป
-
-ผลการทดสอบปัจจุบันของ Movies API Phase 3:
-
-```text
-Test Suites: 2 passed, 2 total
-Tests:       32 passed, 32 total
-```
-
-และมี Test Coverage รวม:
-
-```text
-Statements: 81.96%
-Branches:   71.30%
-Functions:  83.87%
-Lines:      81.58%
-```
-
-ระบบมี Test ครอบคลุมส่วนสำคัญของ Backend ได้แก่ Authentication, JWT, RBAC, Movie API, Genre API, Movie-Genre Relationship และ External Movie API
-
-โดยเฉพาะ Middleware และ External API Service มี Coverage สูง ขณะที่ `src/index.js` มี Coverage ต่ำกว่าส่วนอื่น เนื่องจากเป็นไฟล์หลักที่รวม Endpoint และ Logic จำนวนมาก และยังมีบางกรณีที่ไม่ได้ถูกเรียกใช้จาก Test ปัจจุบัน
-
-ผลการทดสอบล่าสุดยืนยันว่า **32 Tests ผ่านทั้งหมด และไม่มี Test ที่ล้มเหลว** จึงสามารถใช้ผลนี้เป็น Baseline ของ Test Coverage สำหรับ Phase 3 ได้
+ทุก Endpoint ใน `openapi.yaml` (10 Endpoint) มี Test ทั้งกรณีสำเร็จและกรณีผิดพลาดหลัก บรรทัดที่เหลือเป็น `catch` ของ Database Error รายตัว, Rollback ของ Transaction และโค้ดเปิด Server ซึ่งไม่ได้ทำงานระหว่าง Test

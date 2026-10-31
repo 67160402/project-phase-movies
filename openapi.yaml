@@ -3,15 +3,13 @@ openapi: 3.0.3
 info:
   title: Movie API
   version: 1.0.0
-  description: API สำหรับจัดการภาพยนตร์ ประเภทภาพยนตร์ และระบบ Authentication
+  description: API สำหรับจัดการภาพยนตร์ และประเภทภาพยนตร์
 
 servers:
   - url: http://localhost:3000
     description: Local development server
 
 tags:
-  - name: Auth
-    description: ระบบสมัครสมาชิกและเข้าสู่ระบบ
   - name: Movies
     description: จัดการข้อมูลภาพยนตร์
   - name: Genres
@@ -22,126 +20,6 @@ tags:
     description: ค้นหาข้อมูลภาพยนตร์จาก External API
 
 paths:
-  /:
-    get:
-      summary: ตรวจสอบสถานะ API
-      tags:
-        - Movies
-
-      responses:
-        "200":
-          description: API พร้อมใช้งาน
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-              example:
-                message: Movie API พร้อมใช้งานแล้ว
-
-  # =========================================================
-  # Authentication
-  # =========================================================
-
-  /api/v1/auth/register:
-    post:
-      summary: สมัครสมาชิก
-      tags:
-        - Auth
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegisterInput"
-            example:
-              email: user@example.com
-              password: password123
-
-      responses:
-        "201":
-          description: สมัครสมาชิกสำเร็จ
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthUserResponse"
-
-        "400":
-          $ref: "#/components/responses/ValidationError"
-
-        "409":
-          description: อีเมลนี้มีอยู่ในระบบแล้ว
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-
-  /api/v1/auth/login:
-    post:
-      summary: เข้าสู่ระบบ
-      tags:
-        - Auth
-
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginInput"
-            example:
-              email: user@example.com
-              password: password123
-
-      responses:
-        "200":
-          description: เข้าสู่ระบบสำเร็จ
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
-
-        "400":
-          $ref: "#/components/responses/ValidationError"
-
-        "401":
-          description: อีเมลหรือรหัสผ่านไม่ถูกต้อง
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-
-  /api/v1/auth/me:
-    get:
-      summary: ดูข้อมูลผู้ใช้ที่กำลังเข้าสู่ระบบ
-      tags:
-        - Auth
-
-      security:
-        - bearerAuth: []
-
-      responses:
-        "200":
-          description: ดึงข้อมูลผู้ใช้สำเร็จ
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AuthUserResponse"
-
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "500":
-          $ref: "#/components/responses/InternalServerError"
-
   # =========================================================
   # Movies
   # =========================================================
@@ -217,17 +95,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/MovieListResponse"
 
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: เพิ่มภาพยนตร์
-      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถเพิ่มภาพยนตร์ได้
       tags:
         - Movies
-
-      security:
-        - bearerAuth: []
 
       requestBody:
         required: true
@@ -251,11 +128,8 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "403":
-          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
         "500":
           $ref: "#/components/responses/InternalServerError"
@@ -280,17 +154,16 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     put:
       summary: แก้ไขข้อมูลภาพยนตร์
-      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถแก้ไขภาพยนตร์ได้
       tags:
         - Movies
-
-      security:
-        - bearerAuth: []
 
       requestBody:
         required: true
@@ -310,26 +183,19 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
         "404":
           $ref: "#/components/responses/NotFound"
+
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: ลบภาพยนตร์
-      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถลบภาพยนตร์ได้
       tags:
         - Movies
-
-      security:
-        - bearerAuth: []
 
       responses:
         "200":
@@ -344,14 +210,11 @@ paths:
               example:
                 message: ลบภาพยนตร์สำเร็จ
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
         "404":
           $ref: "#/components/responses/NotFound"
+
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
         "500":
           $ref: "#/components/responses/InternalServerError"
@@ -381,17 +244,16 @@ paths:
                     items:
                       $ref: "#/components/schemas/Genre"
 
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: เพิ่มประเภทภาพยนตร์
-      description: ผู้ใช้ที่มี role admin เท่านั้นที่สามารถเพิ่มประเภทภาพยนตร์ได้
       tags:
         - Genres
-
-      security:
-        - bearerAuth: []
 
       requestBody:
         required: true
@@ -413,12 +275,6 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
         "409":
           description: มีชื่อประเภทภาพยนตร์นี้อยู่แล้ว
           content:
@@ -429,6 +285,9 @@ paths:
                 error:
                   code: DUPLICATE_GENRE
                   message: มีประเภทภาพยนตร์นี้อยู่แล้ว
+
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
         "500":
           $ref: "#/components/responses/InternalServerError"
@@ -464,17 +323,17 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
     put:
       summary: กำหนดประเภทให้ภาพยนตร์
-      description: แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา ผู้ใช้ที่มี role admin เท่านั้น
+      description: แทนที่รายการประเภทเดิมด้วย genre_ids ที่ส่งมา (ส่ง [] เพื่อลบประเภททั้งหมด)
       tags:
         - Movie Genres
-
-      security:
-        - bearerAuth: []
 
       requestBody:
         required: true
@@ -526,14 +385,11 @@ paths:
                       code: INVALID_GENRE_IDS
                       message: มี ID ประเภทภาพยนตร์ที่ไม่มีอยู่ในระบบ
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
         "404":
           $ref: "#/components/responses/NotFound"
+
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
         "500":
           $ref: "#/components/responses/InternalServerError"
@@ -585,6 +441,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
         "500":
           $ref: "#/components/responses/InternalServerError"
 
@@ -593,17 +452,6 @@ paths:
 # ===========================================================
 
 components:
-  # ---------------------------------------------------------
-  # Security
-  # ---------------------------------------------------------
-
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: ใส่ JWT Token ที่ได้จาก /api/v1/auth/login
-
   # ---------------------------------------------------------
   # Parameters
   # ---------------------------------------------------------
@@ -711,7 +559,7 @@ components:
 
         total:
           type: integer
-          example: 4
+          example: 8
 
         totalPages:
           type: integer
@@ -775,90 +623,6 @@ components:
             - 3
 
     # -------------------------------------------------------
-    # Auth Schemas
-    # -------------------------------------------------------
-
-    RegisterInput:
-      type: object
-
-      required:
-        - email
-        - password
-
-      properties:
-        email:
-          type: string
-          format: email
-          example: user@example.com
-
-        password:
-          type: string
-          format: password
-          minLength: 6
-          example: password123
-
-    LoginInput:
-      type: object
-
-      required:
-        - email
-        - password
-
-      properties:
-        email:
-          type: string
-          format: email
-          example: user@example.com
-
-        password:
-          type: string
-          format: password
-          example: password123
-
-    AuthUser:
-      type: object
-
-      properties:
-        id:
-          type: integer
-          example: 1
-
-        email:
-          type: string
-          format: email
-          example: user@example.com
-
-        role:
-          type: string
-          enum:
-            - user
-            - admin
-          example: user
-
-    AuthUserResponse:
-      type: object
-
-      properties:
-        message:
-          type: string
-          example: สมัครสมาชิกสำเร็จ
-
-        data:
-          $ref: "#/components/schemas/AuthUser"
-
-    LoginResponse:
-      type: object
-
-      properties:
-        message:
-          type: string
-          example: เข้าสู่ระบบสำเร็จ
-
-        token:
-          type: string
-          description: JWT Token
-
-    # -------------------------------------------------------
     # Error
     # -------------------------------------------------------
 
@@ -903,32 +667,6 @@ components:
               code: VALIDATION_ERROR
               message: กรุณาระบุข้อมูลให้ถูกต้อง
 
-    Unauthorized:
-      description: ไม่มี Token หรือ Token ไม่ถูกต้อง
-
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
-
-          example:
-            error:
-              code: NO_TOKEN
-              message: กรุณาเข้าสู่ระบบก่อนใช้งาน
-
-    Forbidden:
-      description: ผู้ใช้ไม่มีสิทธิ์เข้าถึงทรัพยากรนี้
-
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/ErrorResponse"
-
-          example:
-            error:
-              code: FORBIDDEN
-              message: คุณไม่มีสิทธิ์เข้าถึงทรัพยากรนี้
-
     NotFound:
       description: ไม่พบข้อมูลที่ร้องขอ
 
@@ -941,6 +679,19 @@ components:
             error:
               code: NOT_FOUND
               message: ไม่พบข้อมูลภาพยนตร์
+
+    TooManyRequests:
+      description: เรียก API เกิน 100 ครั้งต่อนาที (Rate Limit)
+
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+          example:
+            error:
+              code: TOO_MANY_REQUESTS
+              message: มีการเรียก API มากเกินไป กรุณาลองใหม่ภายหลัง
 
     InternalServerError:
       description: เกิดข้อผิดพลาดภายในระบบ

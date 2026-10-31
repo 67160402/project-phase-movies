@@ -9,12 +9,6 @@
       "enabled": true
     },
     {
-      "key": "authToken",
-      "value": "",
-      "type": "default",
-      "enabled": true
-    },
-    {
       "key": "movieId",
       "value": "",
       "type": "default",
@@ -22,12 +16,6 @@
     },
     {
       "key": "genreId",
-      "value": "",
-      "type": "default",
-      "enabled": true
-    },
-    {
-      "key": "adminToken",
       "value": "",
       "type": "default",
       "enabled": true

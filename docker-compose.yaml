@@ -70,8 +70,5 @@ services:
       OMDB_FORCE_FAILURE: ${OMDB_FORCE_FAILURE:-false}
       OMDB_FORCE_TIMEOUT: ${OMDB_FORCE_TIMEOUT:-false}
 
-      JWT_SECRET: ${JWT_SECRET:-movie-api-secret-change-this}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-2h}
-
 volumes:
   movie_api_mysql_data:

@@ -18,36 +18,15 @@ let editingMovieId = null;
 // ฟังก์ชันช่วยเหลือ
 // ===============
 
-// ดึง Token ที่เก็บไว้หลัง Login
-function getToken() {
-  return localStorage.getItem("movieApiToken");
-}
-
-// สร้าง Header สำหรับ Request ที่ต้องใช้ Token
-function getAuthHeaders() {
-  const token = getToken();
-
-  return token
-    ? {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      }
-    : {
-        "Content-Type": "application/json",
-      };
-}
+// Header สำหรับส่งข้อมูลแบบ JSON
+const jsonHeaders = { "Content-Type": "application/json" };
 
 // แปลง Error จาก Browser หรือ Network ให้เป็นข้อความภาษาไทย
 function getThaiErrorMessage(error) {
-  if (error.message === "Failed to fetch") {
-    return "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่า Server กำลังทำงานอยู่";
-  }
+  // ข้อความที่ Browser แต่ละตัว (Chrome / Firefox / Safari) ใช้เมื่อเชื่อมต่อ Server ไม่ได้
+  const networkErrors = ["Failed to fetch", "NetworkError when attempting to fetch resource.", "Load failed"];
 
-  if (error.message === "NetworkError when attempting to fetch resource.") {
-    return "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่า Server กำลังทำงานอยู่";
-  }
-
-  if (error.message === "Load failed") {
+  if (networkErrors.includes(error.message)) {
     return "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบว่า Server กำลังทำงานอยู่";
   }
 
@@ -269,240 +248,6 @@ document.getElementById("searchInput").addEventListener("keydown", (event) => {
   }
 });
 
-// ================================
-// Login / Logout
-// ================================
-
-// อ่านข้อมูลที่อยู่ใน Token (id, email, role, exp) ถ้าอ่านไม่ได้จะคืนค่า null
-function parseToken(token) {
-  try {
-    // Token ใช้ base64url (มี - และ _) ต้องแปลงเป็น base64 ปกติก่อนใช้ atob
-    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
-
-// ลบข้อมูลการเข้าสู่ระบบออกจาก Browser
-function clearLogin() {
-  localStorage.removeItem("movieApiToken");
-  localStorage.removeItem("movieApiUser");
-}
-
-// คืนข้อมูลผู้ใช้ที่เข้าสู่ระบบอยู่ ถ้าไม่มี Token หรือ Token หมดอายุแล้วจะคืน null
-function getLoggedInUser() {
-  const token = getToken();
-
-  if (!token) {
-    return null;
-  }
-
-  const payload = parseToken(token);
-
-  // exp เป็นหน่วยวินาที ต้องคูณ 1000 ให้เป็นมิลลิวินาทีก่อนเทียบกับเวลาปัจจุบัน
-  if (!payload || !payload.exp || payload.exp * 1000 <= Date.now()) {
-    clearLogin();
-    return null;
-  }
-
-  return { id: payload.id, email: payload.email, role: payload.role };
-}
-
-// ถ้า Backend ตอบ 401 ตอนมี Token แปลว่า Token หมดอายุ ให้ล้างสถานะแล้วให้เข้าสู่ระบบใหม่
-function handleExpiredLogin() {
-  if (!getToken()) {
-    return;
-  }
-
-  clearLogin();
-  updateLoginStatus();
-  document.getElementById("loginMessage").textContent = "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่";
-}
-
-// ส่ง Email และ Password ไปขอ Token แล้วเก็บไว้ใน Browser (ถ้าไม่สำเร็จจะ throw Error)
-async function requestLogin(email, password) {
-  const response = await fetch("/api/v1/auth/login", {
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify({
-      email,
-      password,
-    }),
-  });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result.error?.message || "เข้าสู่ระบบไม่สำเร็จ");
-  }
-
-  localStorage.setItem("movieApiToken", result.token);
-}
-
-document.getElementById("loginForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  // ถ้าเข้าสู่ระบบอยู่แล้ว ปุ่มนี้คือปุ่ม "ออกจากระบบ"
-  if (getLoggedInUser()) {
-    clearLogin();
-    updateLoginStatus();
-    return;
-  }
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-
-  const loginMessage = document.getElementById("loginMessage");
-
-  // ================================
-  // Login Validation
-  // ================================
-
-  if (!email) {
-    loginMessage.textContent = "กรุณากรอก Email";
-    return;
-  }
-
-  if (!password) {
-    loginMessage.textContent = "กรุณากรอกรหัสผ่าน";
-    return;
-  }
-
-  loginMessage.textContent = "กำลังเข้าสู่ระบบ...";
-
-  try {
-    await requestLogin(email, password);
-
-    // เปลี่ยนหน้าตาฟอร์มเป็นสถานะ "เข้าสู่ระบบแล้ว"
-    updateLoginStatus();
-  } catch (error) {
-    console.error("Login ไม่สำเร็จ:", error);
-
-    // แสดง Error เป็นภาษาไทย
-    loginMessage.textContent = getThaiErrorMessage(error);
-  }
-});
-
-// ===========================
-// อัปเดตหน้าตาฟอร์มตามสถานะ Login
-// ===========================
-
-function updateLoginStatus() {
-  const user = getLoggedInUser();
-
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const roleInput = document.getElementById("roleDisplay");
-  const loginButton = document.getElementById("loginButton");
-  const loginMessage = document.getElementById("loginMessage");
-
-  if (user) {
-    // เข้าสู่ระบบแล้ว: ช่องอีเมลแสดงอีเมลผู้ใช้ ช่องรหัสผ่านถูกแทนด้วย Role
-    emailInput.value = user.email;
-    emailInput.readOnly = true;
-
-    passwordInput.value = "";
-    passwordInput.hidden = true;
-
-    roleInput.value = `Role: ${user.role}`;
-    roleInput.hidden = false;
-
-    loginButton.textContent = "ออกจากระบบ";
-    loginMessage.textContent = "เข้าสู่ระบบแล้ว";
-  } else {
-    // ยังไม่ได้เข้าสู่ระบบ (หรือ Token หมดอายุ): กลับเป็นฟอร์มปกติ
-    emailInput.value = "";
-    emailInput.readOnly = false;
-
-    passwordInput.value = "";
-    passwordInput.hidden = false;
-
-    roleInput.hidden = true;
-
-    loginButton.textContent = "เข้าสู่ระบบ";
-    loginMessage.textContent = "กรุณาเข้าสู่ระบบ";
-  }
-}
-
-// ================================
-// สมัครสมาชิก
-// ================================
-
-document.getElementById("registerForm").addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const email = document.getElementById("registerEmail").value.trim();
-  const password = document.getElementById("registerPassword").value;
-
-  const registerMessage = document.getElementById("registerMessage");
-
-  if (!email) {
-    registerMessage.textContent = "กรุณากรอก Email";
-    return;
-  }
-
-  if (!password) {
-    registerMessage.textContent = "กรุณากรอกรหัสผ่าน";
-    return;
-  }
-
-  // ตามเอกสาร openapi.yaml รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร
-  if (password.length < 6) {
-    registerMessage.textContent = "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร";
-    return;
-  }
-
-  registerMessage.textContent = "กำลังสมัครสมาชิก...";
-
-  try {
-    const response = await fetch("/api/v1/auth/register", {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
-      body: JSON.stringify({
-        email,
-        password,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error?.message || "สมัครสมาชิกไม่สำเร็จ");
-    }
-
-    document.getElementById("registerForm").reset();
-
-    // ถ้าเข้าสู่ระบบอยู่ (เช่น Admin) ไม่สลับบัญชีให้ ผู้ใช้ต้องออกจากระบบเอง
-    if (getLoggedInUser()) {
-      registerMessage.textContent = "สมัครสมาชิกสำเร็จ (ออกจากระบบก่อน แล้วเข้าสู่ระบบด้วยบัญชีใหม่)";
-      return;
-    }
-
-    // Backend ไม่ส่ง Token กลับมาตอนสมัคร จึงเข้าสู่ระบบให้อัตโนมัติด้วยอีเมลและรหัสผ่านเดิม
-    try {
-      await requestLogin(email, password);
-      updateLoginStatus();
-      registerMessage.textContent = "สมัครสมาชิกสำเร็จ และเข้าสู่ระบบแล้ว";
-    } catch {
-      registerMessage.textContent = "สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ";
-    }
-  } catch (error) {
-    console.error("สมัครสมาชิกไม่สำเร็จ:", error);
-
-    // แสดง Error เป็นภาษาไทย
-    registerMessage.textContent = getThaiErrorMessage(error);
-  }
-});
-
 // =====================
 // เพิ่ม / แก้ไขภาพยนตร์
 // =====================
@@ -552,7 +297,7 @@ document.getElementById("movieForm").addEventListener("submit", async (event) =>
     const response = await fetch(url, {
       method,
 
-      headers: getAuthHeaders(),
+      headers: jsonHeaders,
 
       body: JSON.stringify({
         title,
@@ -564,9 +309,6 @@ document.getElementById("movieForm").addEventListener("submit", async (event) =>
     const result = await response.json();
 
     if (!response.ok) {
-      // Token หมดอายุหรือไม่ถูกต้อง ให้ล้างสถานะเข้าสู่ระบบ
-      if (response.status === 401) handleExpiredLogin();
-
       throw new Error(result.error?.message || "ไม่สามารถบันทึกข้อมูลได้");
     }
 
@@ -637,15 +379,12 @@ async function deleteMovie(id) {
   try {
     const response = await fetch(`/api/v1/movies/${id}`, {
       method: "DELETE",
-      headers: getAuthHeaders(),
+      headers: jsonHeaders,
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      // Token หมดอายุหรือไม่ถูกต้อง ให้ล้างสถานะเข้าสู่ระบบ
-      if (response.status === 401) handleExpiredLogin();
-
       throw new Error(result.error?.message || "ไม่สามารถลบภาพยนตร์ได้");
     }
     // แสดงข้อความสำเร็จใต้ฟอร์ม
@@ -663,7 +402,5 @@ async function deleteMovie(id) {
 // เริ่มต้นโหลดหน้าเว็บ
 // ===============
 
-// แสดงสถานะ Login ที่มีอยู่แล้ว
-updateLoginStatus();
 // โหลด Movie จาก API
 loadMovies();
