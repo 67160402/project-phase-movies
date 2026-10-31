@@ -98,6 +98,29 @@ Swagger:
 http://localhost:3000/api-docs
 ```
 
+## Run with Docker
+
+ไม่ต้องติดตั้ง Node.js หรือ MySQL ในเครื่อง ใช้แค่ Docker
+
+```bash
+cp .env.example .env   # ใส่ OMDB_API_KEY / JWT_SECRET (ไม่ใส่ก็ใช้ค่า default ได้)
+docker compose up -d --build
+```
+
+- Web + API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/api-docs`
+- MySQL จากเครื่อง Host: `localhost:3307` (user `root`)
+
+ฐานข้อมูลจะถูกสร้างจาก `schema.sql` และ `seed.sql` อัตโนมัติในครั้งแรก
+
+```bash
+docker compose logs -f api      # ดู log ของ API
+docker compose down             # หยุดการทำงาน
+docker compose down -v          # หยุดและล้างฐานข้อมูลกลับเป็นข้อมูลตั้งต้น
+```
+
+หลังแก้โค้ด ต้องรัน `docker compose up -d --build` ใหม่เพื่อ build image อีกครั้ง
+
 ## Main API
 
 ### Authentication
