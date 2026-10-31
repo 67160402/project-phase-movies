@@ -5,10 +5,14 @@ INSERT INTO movies (title, director, release_year) VALUES
   ('Interstellar', 'Christopher Nolan', 2014),
   ('Parasite', 'Bong Joon-ho', 2019),
   ('The Dark Knight', 'Christopher Nolan', 2008),
-  ('Spirited Away', 'Hayao Miyazaki', 2001),
   ('The Matrix', 'Lana Wachowski, Lilly Wachowski', 1999),
-  ('Pulp Fiction', 'Quentin Tarantino', 1994),
-  ('Your Name', 'Makoto Shinkai', 2016);
+  ('Spider-Man', 'Sam Raimi', 2002),
+  ('Spider-Man: Homecoming', 'Jon Watts', 2017),
+  ('Spider-Man: Into the Spider-Verse', 'Rodney Rothman', 2018),
+  ('The Avengers', 'Joss Whedon', 2012),
+  ('Avengers: Endgame', 'Anthony Russo, Joe Russo', 2019),
+  ('The Shawshank Redemption', 'Frank Darabont', 1994),
+  ('The Godfather', 'Francis Ford Coppola', 1972);
 
 INSERT INTO genres (name) VALUES
   ('Sci-Fi'),

@@ -1,11 +1,11 @@
-require("dotenv").config(); // โหลดค่าจากไฟล์ .env มาใช้ (เช่น PORT, DB_HOST)
+require("dotenv").config();
 
 const express = require("express"); // เรียกใช้ Express เอาไว้สร้างเว็บเซิร์ฟเวอร์/API
 const path = require("path"); // เครื่องมือจัดการที่อยู่ไฟล์/โฟลเดอร์
 const pool = require("../db"); // ตัวเชื่อมต่อฐานข้อมูล MySQL (มาจากไฟล์ db.js)
 
 const swaggerUi = require("swagger-ui-express"); // ทำหน้าเว็บเอกสาร API (Swagger)
-const YAML = require("yamljs"); // อ่านไฟล์ .yaml (ใช้อ่าน openapi.yaml)
+const YAML = require("yamljs"); // อ่านไฟล์ .yaml
 const { searchExternalMovie } = require("./services/external-api"); // ฟังก์ชันค้นหาหนังจาก OMDb (API ภายนอก)
 
 // ฟังก์ชันช่วยจัดการหน้า (page), การเรียงลำดับ (sort), และคำค้นหา (search)
@@ -14,10 +14,10 @@ const { parsePagination, parseSort, parseSearch } = require("./middleware/query-
 // ตัวจำกัดจำนวนครั้งที่เรียก API กันคนยิงรัว ๆ
 const { generalLimiter } = require("./middleware/rateLimiter");
 
-const app = express(); // สร้างแอป Express
-const PORT = process.env.PORT || 3000; // ใช้พอร์ตจาก .env ถ้าไม่มีใช้ 3000
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(express.json()); // ให้อ่านข้อมูลที่ส่งมาเป็น JSON ได้ (req.body)
+app.use(express.json());
 
 // ใช้ตัวจำกัดจำนวนครั้งกับทุกเส้นทางที่ขึ้นต้นด้วย /api/v1
 app.use("/api/v1", generalLimiter);
@@ -44,8 +44,10 @@ function sendError(res, status, code, message) {
 function isValidMovie({ title, director, release_year }) {
   return (
     typeof title === "string" && // title ต้องเป็นข้อความ
+    // (trim = ตัดช่องว่างหัวท้าย)
     title.trim() !== "" && // และต้องไม่ว่าง
     typeof director === "string" && // director ต้องเป็นข้อความ
+    // (trim = ตัดช่องว่างหัวท้าย)
     director.trim() !== "" && // และต้องไม่ว่าง
     Number.isInteger(release_year) && // ปีต้องเป็นจำนวนเต็ม
     release_year > 0 // และมากกว่า 0
@@ -69,9 +71,9 @@ app.get("/api/v1/movies", parsePagination, parseSort, parseSearch, async (req, r
     const { field, order } = req.sort; // เรียงตามคอลัมน์ไหน, มากไปน้อยหรือน้อยไปมาก
     const { q } = req.search; // คำที่ค้นหา
 
-    // ถ้ามีคำค้น ให้ค้นจากชื่อหนังหรือชื่อผู้กำกับ
+    // ถ้ามีคำค้นหา ให้ค้นหาจากชื่อหนังหรือชื่อผู้กำกับ
     const where = q ? "WHERE title LIKE ? OR director LIKE ?" : "";
-    const params = q ? [`%${q}%`, `%${q}%`] : []; // %คำค้น% = มีคำนี้อยู่ตรงไหนก็ได้
+    const params = q ? [`%${q}%`, `%${q}%`] : []; // %คำค้นหา% = มีคำนี้อยู่ตรงไหนก็ได้
 
     // ดึงหนังตามเงื่อนไข เรียงลำดับ และตัดเอาเฉพาะหน้านี้ (LIMIT/OFFSET)
     const [rows] = await pool.query(
@@ -94,7 +96,7 @@ app.get("/api/v1/movies", parsePagination, parseSort, parseSearch, async (req, r
   }
 });
 
-// GET /api/v1/movies/:id : ดึงหนัง 1 เรื่องตาม id
+// GET /api/v1/movies/:id : ดึงหนังตาม id
 app.get("/api/v1/movies/:id", async (req, res, next) => {
   try {
     const movie = await findMovie(req.params.id); // หาหนังจาก id ใน URL
@@ -117,7 +119,7 @@ app.post("/api/v1/movies", async (req, res, next) => {
       return sendError(res, 400, "VALIDATION_ERROR", "กรุณาระบุ title, director และ release_year ให้ถูกต้อง");
     }
 
-    const { title, director, release_year } = req.body; // แกะค่าออกจาก body
+    const { title, director, release_year } = req.body; // นำค่าออกจาก body
 
     // เพิ่มข้อมูลลงตาราง movies (trim = ตัดช่องว่างหัวท้าย)
     const [result] = await pool.query("INSERT INTO movies (title, director, release_year) VALUES (?, ?, ?)", [
@@ -126,7 +128,7 @@ app.post("/api/v1/movies", async (req, res, next) => {
       release_year,
     ]);
 
-    // ตอบ 201 (สร้างสำเร็จ) พร้อมหนังที่เพิ่งเพิ่ม (insertId = id ที่ DB สร้างให้)
+    // ตอบ 201 พร้อมหนังที่เพิ่มสำเร็จ (insertId = id ที่ Database สร้างให้)
     res.status(201).json({ message: "เพิ่มภาพยนตร์สำเร็จ", data: await findMovie(result.insertId) });
   } catch (err) {
     next(err);
@@ -136,12 +138,12 @@ app.post("/api/v1/movies", async (req, res, next) => {
 // PUT /api/v1/movies/:id : แก้ไขหนัง (ต้องส่งข้อมูลครบทุกช่อง)
 app.put("/api/v1/movies/:id", async (req, res, next) => {
   try {
-    // เช็คข้อมูลก่อน ถ้าไม่ถูกต้องตอบ 400
+    // เช็คข้อมูลก่อน ถ้าไม่ถูกให้ตอบ 400
     if (!isValidMovie(req.body)) {
       return sendError(res, 400, "VALIDATION_ERROR", "กรุณาระบุ title, director และ release_year ให้ถูกต้อง");
     }
 
-    const { title, director, release_year } = req.body; // แกะค่าออกจาก body
+    const { title, director, release_year } = req.body; // นำค่าออกจาก body
 
     // แก้ข้อมูลหนังที่ id ตรงกัน
     const [result] = await pool.query("UPDATE movies SET title = ?, director = ?, release_year = ? WHERE id = ?", [
