@@ -64,7 +64,7 @@ async function findMovie(id) {
 // Movies
 // =========
 
-// GET /api/v1/movies : ดึงรายการหนังทั้งหมด (แบ่งหน้า + ค้นหา + เรียงลำดับ)
+// GET /api/v1/movies : ดึงรายการหนังทั้งหมด (แบ่งหน้า + เรียงลำดับ + ค้นหา)
 app.get("/api/v1/movies", parsePagination, parseSort, parseSearch, async (req, res, next) => {
   try {
     const { page, limit, offset } = req.pagination; // หน้าที่เท่าไร, ต่อหน้ากี่เรื่อง, ข้ามกี่เรื่อง
@@ -76,11 +76,11 @@ app.get("/api/v1/movies", parsePagination, parseSort, parseSearch, async (req, r
     const params = q ? [`%${q}%`, `%${q}%`] : []; // %คำค้นหา% = มีคำนี้อยู่ตรงไหนก็ได้
 
     // ดึงหนังตามเงื่อนไข เรียงลำดับ และตัดเอาเฉพาะหน้านี้ (LIMIT/OFFSET)
-    const [rows] = await pool.query(
-      `SELECT id, title, director, release_year FROM movies ${where}
-       ORDER BY ${field} ${order} LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
-    );
+    const [rows] = await pool.query("SELECT id, title, director, release_year FROM movies ${where} ORDER BY ${field} ${order} LIMIT ? OFFSET ?", [
+      ...params,
+      limit,
+      offset,
+    ]);
 
     // นับจำนวนหนังทั้งหมด เอาไปคำนวณจำนวนหน้า
     const [[{ total }]] = await pool.query(`SELECT COUNT(*) AS total FROM movies ${where}`, params);
